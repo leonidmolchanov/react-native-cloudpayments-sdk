@@ -333,9 +333,6 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
    * Обработка отменённого платежа
    */
   private fun handleCancelledPayment() {
-    // Отправляем событие ошибки транзакции (отмена)
-    eventEmitter.sendTransactionError(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
-    
     // Создаем результат отмены для Promise - используем тот же формат что в iOS
     val result = Arguments.createMap().apply {
       putBoolean(EResponseKeys.SUCCESS.rawValue, false)

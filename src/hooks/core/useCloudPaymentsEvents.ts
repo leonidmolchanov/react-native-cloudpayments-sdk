@@ -97,6 +97,7 @@ export const useCloudPaymentsEvents = (
 
   const [state, setState] = useState<ICloudPaymentsBaseState>(INITIAL_STATE);
   const subscriptionsRef = useRef<EmitterSubscription[]>([]);
+  const paymentResultProcessedRef = useRef<boolean>(false); // Флаг для отслеживания обработанных результатов
 
   const {
     enabledEvents = DEFAULT_ENABLED_EVENTS,
@@ -149,6 +150,7 @@ export const useCloudPaymentsEvents = (
     ) => {
       const error: ICloudPaymentsError = { message, code, details };
       setStatus('error', { error });
+      paymentResultProcessedRef.current = true; // Помечаем результат как обработанный
     },
     [setStatus]
   );
@@ -169,6 +171,7 @@ export const useCloudPaymentsEvents = (
    */
   const resetState = useCallback(() => {
     setState(INITIAL_STATE);
+    paymentResultProcessedRef.current = false; // Сбрасываем флаг
   }, []);
 
   // ============================================================================
@@ -183,6 +186,7 @@ export const useCloudPaymentsEvents = (
       switch (event.action) {
         case 'willDisplay':
           setStatus('initializing');
+          paymentResultProcessedRef.current = false; // Сбрасываем флаг при начале нового платежа
           break;
 
         case 'didDisplay':
@@ -194,11 +198,17 @@ export const useCloudPaymentsEvents = (
           break;
 
         case 'didHide':
-          // Форма скрыта - сбрасываем состояние если не было транзакции
-          if (state.status !== 'success' && state.status !== 'error') {
+          // Форма скрыта - вызываем onCancel только если результат еще не был обработан
+          if (
+            !paymentResultProcessedRef.current &&
+            state.status !== 'success' &&
+            state.status !== 'error'
+          ) {
             setStatus('cancelled');
             onCancel?.();
           }
+          // Сбрасываем флаг после обработки
+          paymentResultProcessedRef.current = false;
           break;
 
         case 'transaction':
@@ -206,6 +216,7 @@ export const useCloudPaymentsEvents = (
             // Успешная транзакция
             const transactionId = event.transactionId || null;
             setStatus('success', { transactionId });
+            paymentResultProcessedRef.current = true; // Помечаем результат как обработанный
 
             if (onSuccess && transactionId) {
               onSuccess({ transactionId, message: event.message });
