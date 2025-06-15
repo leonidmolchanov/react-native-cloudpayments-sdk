@@ -43,6 +43,7 @@
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
+    "release:test": "./scripts/test-release.sh",
     "generate-api": "node scripts/generate-api-docs.js",
     "docs:dev": "yarn workspace @lm/react-native-cloudpayments-docs start",
     "docs:build": "yarn workspace @lm/react-native-cloudpayments-docs build"
