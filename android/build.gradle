@@ -85,6 +85,6 @@ dependencies {
 
 react {
   jsRootDir = file("../src/")
-  libraryName = "CloudpaymentsSdk"
+  libraryName = "NativeCloudpaymentsSdk"
   codegenJavaPackageName = "com.cloudpaymentssdk"
 }

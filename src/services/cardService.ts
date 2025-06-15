@@ -8,6 +8,7 @@ export const CardService: ICardService = {
   },
 
   getBankInfo(cardNumber: string): Promise<IBankInfo> {
+    //@ts-ignore
     return CloudpaymentsSdk.getBankInfo(cardNumber);
   },
 

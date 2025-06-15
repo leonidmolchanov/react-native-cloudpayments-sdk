@@ -56,6 +56,122 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  override fun getPublicKey(promise: Promise) {
+    try {
+      // TODO: Implement actual public key retrieval from CloudPayments SDK
+      promise.resolve("dummy_public_key")
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.GET_PUBLIC_KEY_ERROR.rawValue, "Failed to get public key: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun isCardNumberValid(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: Implement card number validation
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, "Failed to validate card number: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun isExpDateValid(expDate: String, promise: Promise) {
+    try {
+      // TODO: Implement expiry date validation
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, "Failed to validate expiry date: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun isValidCvv(cvv: String, isCvvRequired: Boolean, promise: Promise) {
+    try {
+      // TODO: Implement CVV validation
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, "Failed to validate CVV: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun cardTypeFromCardNumber(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: Implement card type detection
+      promise.resolve("Unknown")
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, "Failed to detect card type: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun makeCardCryptogramPacket(
+    cardNumber: String,
+    expDate: String,
+    cvv: String,
+    merchantPublicID: String,
+    publicKey: String,
+    keyVersion: Double,
+    promise: Promise
+  ) {
+    try {
+      // TODO: Implement cryptogram creation
+      promise.resolve("dummy_cryptogram")
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, "Failed to create cryptogram: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun createIntent(paymentData: ReadableMap, promise: Promise) {
+    try {
+      // TODO: Implement intent creation
+      val result = Arguments.createMap()
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.CREATE_INTENT_ERROR.rawValue, "Failed to create intent: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun createIntentApiPay(
+    paymentData: ReadableMap,
+    cardCryptogram: String,
+    intentId: String,
+    promise: Promise
+  ) {
+    try {
+      // TODO: Implement intent API pay
+      val result = Arguments.createMap()
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.API_PAY_ERROR.rawValue, "Failed to process intent payment: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun getIntentWaitStatus(paymentData: ReadableMap, type: String, promise: Promise) {
+    try {
+      // TODO: Implement intent wait status
+      promise.resolve(0.0)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.INTENT_WAIT_STATUS_ERROR.rawValue, "Failed to get intent status: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
+  override fun getBankInfo(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: Implement bank info retrieval
+      val result = Arguments.createMap()
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject(ECloudPaymentsError.BANK_INFO_ERROR.rawValue, "Failed to get bank info: ${e.message}", e)
+    }
+  }
+
+  @ReactMethod
   override fun presentPaymentForm(paymentData: ReadableMap, promise: Promise) {
     try {
       val currentPublicId = this.publicId

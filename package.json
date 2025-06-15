@@ -185,7 +185,7 @@
     ]
   },
   "codegenConfig": {
-    "name": "CloudpaymentsSdkSpec",
+    "name": "CloudpaymentsSdk",
     "type": "modules",
     "jsSrcsDir": "src",
     "android": {

@@ -12,7 +12,7 @@ export const PaymentService: IPaymentService = {
   async init(publicId: string): Promise<void> {
     await CloudpaymentsSdk.initialize(publicId);
   },
-
+  //@ts-ignore
   createIntent(paymentData: ICreateIntentPaymentData) {
     return CloudpaymentsSdk.createIntent(paymentData);
   },
@@ -47,7 +47,7 @@ export const PaymentService: IPaymentService = {
       };
     }
   },
-
+  //@ts-ignore
   presentPaymentForm(paymentData: IPaymentData) {
     return CloudpaymentsSdk.presentPaymentForm(paymentData);
   },
