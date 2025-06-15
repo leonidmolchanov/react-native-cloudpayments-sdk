@@ -36,8 +36,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Generate API documentation
-        run: yarn generate-api || echo "API generation skipped"
+      # - name: Generate API documentation
+      #   run: yarn generate-api || echo "API generation skipped"
 
       - name: Build documentation
         run: yarn docs:build

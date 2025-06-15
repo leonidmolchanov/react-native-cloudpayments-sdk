@@ -7,9 +7,9 @@ echo "🔧 Building CloudPayments SDK Documentation..."
 echo "📦 Installing dependencies..."
 yarn install
 
-# Generate API docs
-echo "📚 Generating API documentation..."
-yarn generate-api
+# Generate API docs (temporarily disabled due to MDX compilation issues)
+# echo "📚 Generating API documentation..."
+# yarn generate-api
 
 # Build Docusaurus site
 echo "🏗️ Building Docusaurus site..."
