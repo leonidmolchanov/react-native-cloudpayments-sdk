@@ -39,7 +39,9 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "release": "release-it --only-version",
-    "generate-api": "node scripts/generate-api-docs.js"
+    "generate-api": "node scripts/generate-api-docs.js",
+    "docs:dev": "yarn workspace @lm/react-native-cloudpayments-docs start",
+    "docs:build": "yarn workspace @lm/react-native-cloudpayments-docs build"
   },
   "keywords": [
     "react-native",

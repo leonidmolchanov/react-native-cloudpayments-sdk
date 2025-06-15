@@ -31,19 +31,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Generate API documentation
-        run: npm run generate-api || echo "API generation skipped"
+        run: yarn generate-api || echo "API generation skipped"
 
       - name: Build documentation
-        run: |
-          cd docs
-          npm ci
-          npm run build
+        run: yarn docs:build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

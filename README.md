@@ -187,7 +187,7 @@ eventEmitter.addListener(EPaymentFormEventName.PAYMENT_FORM, (event) => {
 - [🚀 Быстрый старт](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/docs/getting-started)
 - [📱 Настройка платформ](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/docs/platforms/android)
 - [💳 Использование](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/docs/usage/payment-form)
-- [🔌 API Reference](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/docs/api/overview)
+- [💳 Использование платежной формы](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/docs/usage/payment-form)
 
 ## 🤝 Поддержка
 
