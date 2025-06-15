@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
 import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
-
+import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -32,7 +32,7 @@ import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
  *
  * Формат: pk_xxxxxxxxxxxxxxxxxxxxxxxx
  */
-const PUBLIC_ID = ''; // TODO: Замените на ваш ключ!
+const PUBLIC_ID = KEY; // TODO: Замените на ваш ключ!
 
 // ============================================================================
 // TYPES
@@ -87,6 +87,31 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   publicId: PUBLIC_ID,
   requireEmail: true,
   showResultScreen: true,
+  enableCardScanner: true, // Включаем сканер карт для Android
+  cardScannerConfig: {
+    // Настройки полей карты
+    requireExpiry: true,
+    requireCVV: false,
+    requirePostalCode: false,
+    requireCardholderName: false,
+
+    // Настройки интерфейса
+    hideCardIOLogo: true,
+    usePayPalLogo: false,
+    suppressManualEntry: false,
+
+    // Цветовая схема
+    actionBarColor: '#2196F3',
+    guideColor: '#4CAF50',
+
+    // Локализация
+    language: 'ru',
+
+    // Дополнительные настройки
+    suppressConfirmation: false,
+    suppressScan: false,
+    keepApplicationTheme: false,
+  },
 };
 
 // ============================================================================
