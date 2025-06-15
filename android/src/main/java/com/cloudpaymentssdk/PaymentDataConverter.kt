@@ -75,6 +75,20 @@ object PaymentDataConverter {
             null
         }
         
+        // Создаем CardIO сканер если включен или передана конфигурация
+        val cardScanner = if (paymentDataMap.hasKey(ECardIOConstants.ENABLE_CARD_SCANNER) && 
+                             paymentDataMap.getBoolean(ECardIOConstants.ENABLE_CARD_SCANNER)) {
+            val cardScannerConfig = paymentDataMap.getMap(ECardIOConstants.CARD_SCANNER_CONFIG)
+            CardIOScanner.fromJSConfig(cardScannerConfig)
+        } else if (paymentDataMap.hasKey(ECardIOConstants.CARD_SCANNER_CONFIG)) {
+            // Если передана конфигурация сканера, но enableCardScanner не указан - включаем автоматически
+            val cardScannerConfig = paymentDataMap.getMap(ECardIOConstants.CARD_SCANNER_CONFIG)
+            CardIOScanner.fromJSConfig(cardScannerConfig)
+        } else {
+            // По умолчанию включаем сканер с базовыми настройками
+            CardIOScanner()
+        }
+        
         val paymentData = PaymentData(
             amount = paymentDataMap.getString(EPaymentConfigKeys.AMOUNT.rawValue) ?: "0",
             currency = paymentDataMap.getString(EPaymentConfigKeys.CURRENCY.rawValue) ?: ECurrency.RUB,
@@ -89,6 +103,7 @@ object PaymentDataConverter {
         return PaymentConfiguration(
             publicId = publicId,
             paymentData = paymentData,
+            scanner = cardScanner,
             requireEmail = paymentDataMap.hasKey(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue) && 
                           paymentDataMap.getBoolean(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue),
             useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) && 

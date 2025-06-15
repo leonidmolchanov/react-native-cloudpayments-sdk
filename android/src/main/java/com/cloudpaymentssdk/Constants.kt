@@ -21,10 +21,10 @@ enum class ECloudPaymentsError(val rawValue: String) {
     PATCH_INTENT_ERROR("PATCH_INTENT_ERROR"),
     API_PAY_ERROR("API_PAY_ERROR"),
     INTENT_ID_NOT_FOUND("INTENT_ID_NOT_FOUND"),
-    
+
     // Card Service Errors
     BANK_INFO_ERROR("BANK_INFO_ERROR"),
-    
+
     // Payment Form Errors
     PAYMENT_FAILED("PAYMENT_FAILED"),
     SERVICE_UNINITIALIZED("SERVICE_UNINITIALIZED"),
@@ -177,4 +177,29 @@ object EAndroidSpecific {
     const val SUCCESS_PROCESSING_ERROR = "SUCCESS_PROCESSING_ERROR"
     const val FAILED_PROCESSING_ERROR = "FAILED_PROCESSING_ERROR"
     const val PAYMENT_FORM_ERROR = "PAYMENT_FORM_ERROR"
-} 
+}
+
+// MARK: - CardIO Configuration Keys
+
+enum class ECardIOConfigKeys(val rawValue: String) {
+    REQUIRE_EXPIRY("requireExpiry"),
+    REQUIRE_CVV("requireCVV"),
+    REQUIRE_POSTAL_CODE("requirePostalCode"),
+    REQUIRE_CARDHOLDER_NAME("requireCardholderName"),
+    HIDE_CARDIO_LOGO("hideCardIOLogo"),
+    USE_PAYPAL_LOGO("usePayPalLogo"),
+    SUPPRESS_MANUAL_ENTRY("suppressManualEntry"),
+    ACTION_BAR_COLOR("actionBarColor"),
+    GUIDE_COLOR("guideColor"),
+    LANGUAGE("language"),
+    SUPPRESS_CONFIRMATION("suppressConfirmation"),
+    SUPPRESS_SCAN("suppressScan"),
+    KEEP_APPLICATION_THEME("keepApplicationTheme")
+}
+
+// MARK: - CardIO Constants
+
+object ECardIOConstants {
+    const val ENABLE_CARD_SCANNER = "enableCardScanner"
+    const val CARD_SCANNER_CONFIG = "cardScannerConfig"
+}
