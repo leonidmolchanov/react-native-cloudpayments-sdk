@@ -39,6 +39,10 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "release": "release-it --only-version",
+    "release:auto": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
     "generate-api": "node scripts/generate-api-docs.js",
     "docs:dev": "yarn workspace @lm/react-native-cloudpayments-docs start",
     "docs:build": "yarn workspace @lm/react-native-cloudpayments-docs build"
@@ -88,6 +92,7 @@
     "react-native": "0.79.2",
     "react-native-builder-bob": "^0.40.11",
     "release-it": "^17.10.0",
+    "standard-version": "^9.5.0",
     "turbo": "^1.10.7",
     "typescript": "^5.8.3"
   },
