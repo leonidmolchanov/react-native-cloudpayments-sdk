@@ -1,7 +1,7 @@
 {
-  "name": "react-native-cloudpayments-sdk",
+  "name": "@lm/react-native-cloudpayments",
   "version": "0.1.0",
-  "description": "Cloudpayments SDK",
+  "description": "CloudPayments SDK for React Native",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -32,7 +32,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-cloudpayments-sdk-example",
+    "example": "yarn workspace @lm/react-native-cloudpayments-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -42,6 +42,9 @@
   },
   "keywords": [
     "react-native",
+    "cloudpayments",
+    "payment",
+    "sdk",
     "ios",
     "android"
   ],
@@ -56,7 +59,8 @@
   },
   "homepage": "https://github.com/leonidmolchanov/react-native-cloudpayments-sdk#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.6.0",

@@ -1,97 +1,190 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# CloudPayments SDK Example App
 
-# Getting Started
+Демонстрационное приложение для тестирования и изучения возможностей CloudPayments React Native SDK.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🚀 Быстрый старт
 
-## Step 1: Start Metro
+### ⚠️ Важно: Настройка PUBLIC_ID
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+**Перед запуском приложения обязательно укажите ваш публичный ключ CloudPayments!**
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+1. Откройте файл `src/App.tsx`
+2. Найдите строку с `PUBLIC_ID`
+3. Замените тестовый ключ на ваш:
 
-```sh
-# Using npm
+```typescript
+// Замените этот ключ на ваш
+const PUBLIC_ID = 'pk_ваш_ключ_здесь';
+```
+
+### 📋 Где получить PUBLIC_ID
+
+1. Войдите в [личный кабинет CloudPayments](https://merchant.cloudpayments.ru/)
+2. Перейдите в раздел **"Настройки"** → **"API"**
+3. Скопируйте **"Public ID"** (формат: `pk_xxxxxxxxxxxxxxxxxxxxxxxx`)
+
+## 🛠️ Установка и запуск
+
+### Предварительные требования
+
+Убедитесь, что у вас установлены:
+
+- [Node.js](https://nodejs.org/) (версия 18 или выше)
+- [React Native CLI](https://reactnative.dev/docs/environment-setup)
+- [Android Studio](https://developer.android.com/studio) (для Android)
+- [Xcode](https://developer.apple.com/xcode/) (для iOS, только на macOS)
+
+### Шаг 1: Установка зависимостей
+
+```bash
+# Установка npm зависимостей
+npm install
+
+# Для iOS: установка CocoaPods зависимостей
+cd ios && pod install && cd ..
+```
+
+### Шаг 2: Запуск Metro
+
+```bash
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+### Шаг 3: Запуск приложения
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+#### Android
 
-### Android
-
-```sh
-# Using npm
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+#### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 📱 Возможности Example App
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### 🎯 Текущие функции
 
-## Step 3: Modify your app
+- **Оплата через форму** - Демонстрация стандартной платежной формы CloudPayments
+- **Отображение статуса** - Реальное время отслеживания состояния SDK
+- **Обработка событий** - Показ всех callback'ов (успех, ошибка, отмена, прогресс)
+- **Красивый UI** - Современный интерфейс с Material Design
 
-Now that you have successfully run the app, let's make changes!
+### 🔮 Планируемые функции
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- **Прямая оплата картой** - Ввод данных карты в приложении
+- **Apple Pay** - Интеграция с Apple Pay
+- **Google Pay** - Интеграция с Google Pay
+- **Настройки** - Конфигурация различных параметров SDK
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 🧪 Тестирование
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### Тестовые данные
 
-## Congratulations! :tada:
+Приложение использует следующие тестовые данные для платежей:
 
-You've successfully run and modified your React Native App. :partying_face:
+- **Сумма**: 1000.00 RUB
+- **Описание**: "Тестовый платеж из Example App"
+- **Email**: test@example.com
+- **ID пользователя**: user_12345
 
-### Now what?
+### Тестовые карты CloudPayments
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Для тестирования используйте следующие карты:
 
-# Troubleshooting
+| Номер карты           | Результат           |
+| --------------------- | ------------------- |
+| `4242 4242 4242 4242` | Успешный платеж     |
+| `4000 0000 0000 0002` | Отклонен банком     |
+| `4000 0000 0000 0069` | Истек срок действия |
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+**Дата истечения**: любая будущая дата (например, 12/25)  
+**CVV**: любые 3 цифры (например, 123)
 
-# Learn More
+## 🏗️ Структура проекта
 
-To learn more about React Native, take a look at the following resources:
+```
+example/
+├── src/
+│   ├── App.tsx          # Главный компонент приложения
+│   └── form.ts          # Схемы валидации (устаревший файл)
+├── android/             # Android специфичные файлы
+├── ios/                 # iOS специфичные файлы
+├── package.json         # Зависимости проекта
+└── README.md           # Этот файл
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## 🎨 Кастомизация
+
+### Изменение тестовых данных
+
+Отредактируйте объект `SAMPLE_PAYMENT_DATA` в `src/App.tsx`:
+
+```typescript
+const SAMPLE_PAYMENT_DATA: IPaymentData = {
+  amount: '2000.00', // Ваша сумма
+  currency: 'USD', // Ваша валюта
+  description: 'Ваше описание',
+  email: 'your@email.com',
+  accountId: 'your_user_id',
+  requireEmail: true,
+  showResultScreen: true,
+};
+```
+
+### Добавление новых секций
+
+1. Добавьте новый тип в `TSection`
+2. Добавьте секцию в массив `SECTIONS`
+3. Реализуйте логику в `renderSectionContent()`
+
+## 🐛 Устранение неполадок
+
+### Проблемы с запуском
+
+1. **Metro не запускается**:
+
+   ```bash
+   npx react-native start --reset-cache
+   ```
+
+2. **Ошибки сборки Android**:
+
+   ```bash
+   cd android && ./gradlew clean && cd ..
+   npm run android
+   ```
+
+3. **Ошибки сборки iOS**:
+   ```bash
+   cd ios && pod install && cd ..
+   npm run ios
+   ```
+
+### Проблемы с SDK
+
+1. **Ошибка "Invalid PUBLIC_ID"**:
+
+   - Проверьте правильность ключа
+   - Убедитесь, что ключ активен в личном кабинете
+
+2. **Платежи не проходят**:
+   - Проверьте настройки мерчанта
+   - Убедитесь, что тестовый режим включен
+
+## 📞 Поддержка
+
+- **Документация SDK**: [Ссылка на документацию]
+- **Техподдержка CloudPayments**: support@cloudpayments.ru
+- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
+
+## 📄 Лицензия
+
+Этот example проект распространяется под той же лицензией, что и основной SDK.
+
+---
+
+**Удачного тестирования! 🚀**

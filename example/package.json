@@ -1,5 +1,5 @@
 {
-  "name": "react-native-cloudpayments-sdk-example",
+  "name": "@lm/react-native-cloudpayments-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,8 +10,12 @@
     "build:ios": "react-native build-ios --mode Debug"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@lm/react-native-cloudpayments": "link:../",
     "react": "19.0.0",
-    "react-native": "0.79.2"
+    "react-hook-form": "^7.57.0",
+    "react-native": "0.79.2",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
