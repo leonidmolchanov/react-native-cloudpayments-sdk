@@ -94,6 +94,7 @@ git checkout -b feature/new-feature-name
 
 4. 📦 **Публикация**:
    - Публикация в npm registry
+   - Публикация в GitHub Packages
    - Создание GitHub Release
 
 ### 📋 Локальные команды
@@ -200,9 +201,30 @@ yarn generate-api
 
 Все релизы отслеживаются в разделе [Actions](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/actions).
 
-### npm
+### npm & GitHub Packages
 
-Опубликованные версии доступны на [npm](https://www.npmjs.com/package/@lm/react-native-cloudpayments).
+Опубликованные версии доступны в двух местах:
+
+**npm registry:**
+```bash
+npm install @lm/react-native-cloudpayments
+# или
+yarn add @lm/react-native-cloudpayments
+```
+
+**GitHub Packages:**
+```bash
+# Настройка .npmrc
+echo "@leonidmolchanov:registry=https://npm.pkg.github.com/" >> .npmrc
+
+# Установка
+npm install @leonidmolchanov/react-native-cloudpayments
+# или
+yarn add @leonidmolchanov/react-native-cloudpayments
+```
+
+- **npm**: [npm package](https://www.npmjs.com/package/@lm/react-native-cloudpayments)
+- **GitHub Packages**: [GitHub Packages](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/pkgs/npm/react-native-cloudpayments)
 
 ### Changelog
 

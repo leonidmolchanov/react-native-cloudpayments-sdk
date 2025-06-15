@@ -79,11 +79,15 @@
    - Генерируется новая версия
    - Обновляется CHANGELOG.md
    - Создается Git тег
-   - Публикуется в npm
+   - Публикуется в npm registry
+   - Публикуется в GitHub Packages
 
 ### Локальное тестирование
 
 ```bash
+# Полное тестирование процесса релиза
+yarn release:test
+
 # Тестирование версионирования (без публикации)
 yarn release:auto --dry-run
 
@@ -97,6 +101,7 @@ yarn release:auto --dry-run --silent
 
 - **GitHub Actions**: [Actions tab](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/actions)
 - **npm releases**: [npm package](https://www.npmjs.com/package/@lm/react-native-cloudpayments)
+- **GitHub Packages**: [Packages](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/pkgs/npm/react-native-cloudpayments)
 - **GitHub Releases**: [Releases](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/releases)
 
 ## 🎉 Результат

@@ -28,7 +28,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Run tests
         run: yarn test
@@ -69,7 +69,35 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn publish --access public
+        run: npm publish --access public
+
+      - name: Prepare GitHub Packages publication
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          # Создаем package.json для GitHub Packages
+          jq '.name = "@leonidmolchanov/react-native-cloudpayments" | .publishConfig.registry = "https://npm.pkg.github.com/"' package.json > package-github.json
+
+      - name: Publish to GitHub Packages
+        if: steps.changes.outputs.src == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Сохраняем оригинальные файлы
+          cp package.json package.json.backup
+          cp .npmrc .npmrc.backup 2>/dev/null || true
+          
+          # Настраиваем для GitHub Packages
+          cp package-github.json package.json
+          echo "@leonidmolchanov:registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          
+          # Публикуем в GitHub Packages
+          npm publish --access public
+          
+          # Восстанавливаем оригинальные файлы
+          mv package.json.backup package.json
+          mv .npmrc.backup .npmrc 2>/dev/null || rm -f .npmrc
+          rm -f package-github.json
 
       - name: Update documentation
         if: steps.changes.outputs.src == 'true'
