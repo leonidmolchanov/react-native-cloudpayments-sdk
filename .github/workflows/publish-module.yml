@@ -1,0 +1,78 @@
+name: Publish Module
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  publish_module:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Run type checking
+        run: yarn typecheck
+
+      - name: Run linting
+        run: yarn lint
+
+      - name: Build package
+        run: yarn prepare
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for changes in source code
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'android/**'
+              - 'ios/**'
+              - 'package.json'
+              - 'README.md'
+
+      - name: Generate release and update CHANGELOG
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          yarn release:auto
+          git push --follow-tags origin main
+
+      - name: Publish to npm
+        if: steps.changes.outputs.src == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn publish --access public
+
+      - name: Update documentation
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          # Trigger docs rebuild by updating docs workflow
+          echo "Module published, documentation will be updated automatically" 

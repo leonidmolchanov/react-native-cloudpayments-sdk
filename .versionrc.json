@@ -1,0 +1,61 @@
+{
+  "types": [
+    {
+      "type": "feat",
+      "section": "✨ Новые возможности"
+    },
+    {
+      "type": "fix",
+      "section": "🐛 Исправления"
+    },
+    {
+      "type": "perf",
+      "section": "⚡ Оптимизация"
+    },
+    {
+      "type": "refactor",
+      "section": "♻️ Рефакторинг"
+    },
+    {
+      "type": "docs",
+      "section": "📚 Документация"
+    },
+    {
+      "type": "style",
+      "section": "💄 Стиль кода"
+    },
+    {
+      "type": "test",
+      "section": "🧪 Тесты"
+    },
+    {
+      "type": "build",
+      "section": "🏗️ Сборка"
+    },
+    {
+      "type": "ci",
+      "section": "👷 CI/CD"
+    },
+    {
+      "type": "chore",
+      "hidden": true
+    }
+  ],
+  "commitUrlFormat": "https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/{{previousTag}}...{{currentTag}}",
+  "issueUrlFormat": "https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/issues/{{id}}",
+  "userUrlFormat": "https://github.com/{{user}}",
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}}",
+  "skip": {
+    "bump": false,
+    "changelog": false,
+    "commit": false,
+    "tag": false
+  },
+  "bumpFiles": [
+    {
+      "filename": "package.json",
+      "type": "json"
+    }
+  ]
+} 
