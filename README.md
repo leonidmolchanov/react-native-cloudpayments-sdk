@@ -225,3 +225,5 @@ MIT License. См. [LICENSE](LICENSE) для деталей.
 [⭐ Поставьте звезду на GitHub](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk) • [📖 Документация](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/)
 
 </div>
+
+> 🚀 **Автоматическая система релизов**: Этот пакет использует автоматизированную систему релизов с conventional commits.
