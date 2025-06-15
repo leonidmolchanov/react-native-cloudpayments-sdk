@@ -52,7 +52,7 @@ export interface ITransaction {
  *
  * @example Обработка созданного Intent
  * ```typescript
- * import { PaymentService } from '@lm/react-native-cloudpayments';
+ * import { PaymentService } from '@lmapp/react-native-cloudpayments';
  *
  * const intent = await PaymentService.createIntent(paymentData);
  *
@@ -196,7 +196,7 @@ export interface IIntentApiPayResponse {
  *
  * @example Отображение информации о банке
  * ```typescript
- * import { CardService } from '@lm/react-native-cloudpayments';
+ * import { CardService } from '@lmapp/react-native-cloudpayments';
  *
  * const bankInfo = await CardService.getBankInfo('4111111111111111');
  *
@@ -266,7 +266,7 @@ export interface IBankInfo {
  *
  * @example Обработка ответа платежной формы
  * ```typescript
- * import { PaymentService } from '@lm/react-native-cloudpayments';
+ * import { PaymentService } from '@lmapp/react-native-cloudpayments';
  *
  * try {
  *   const result: IPaymentFormResponse = await PaymentService.presentPaymentForm(paymentData);
@@ -334,7 +334,7 @@ export interface IPaymentFormSuccessResponse
  *
  * @example Обработка ошибок платежной формы
  * ```typescript
- * import { EPaymentFormErrorCode } from '@lm/react-native-cloudpayments';
+ * import { EPaymentFormErrorCode } from '@lmapp/react-native-cloudpayments';
  *
  * const handlePaymentError = (error: IPaymentFormError) => {
  *   console.log('Код ошибки:', error.code);
@@ -367,7 +367,7 @@ export interface IPaymentFormError extends IBaseError {}
  *
  * @example Получение и использование публичного ключа
  * ```typescript
- * import { CardService } from '@lm/react-native-cloudpayments';
+ * import { CardService } from '@lmapp/react-native-cloudpayments';
  *
  * const publicKey = await CardService.getPublicKey();
  *

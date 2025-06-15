@@ -147,7 +147,7 @@ dependencies {
 
 ```typescript
 // Проверка доступности Google Pay
-import { PaymentService } from '@lm/react-native-cloudpayments';
+import { PaymentService } from '@lmapp/react-native-cloudpayments';
 
 const checkGooglePay = async () => {
   try {

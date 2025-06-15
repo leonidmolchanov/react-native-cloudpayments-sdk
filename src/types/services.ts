@@ -28,7 +28,7 @@ import type {
  *
  * @example Базовое использование CardService
  * ```typescript
- * import { CardService } from '@lm/react-native-cloudpayments';
+ * import { CardService } from '@lmapp/react-native-cloudpayments';
  *
  * // Проверка корректности номера карты
  * const isValid = CardService.isValidCardNumber('4111111111111111');
@@ -205,7 +205,7 @@ export interface ICardService {
  *
  * @example Базовое использование PaymentService
  * ```typescript
- * import { PaymentService, IPaymentData } from '@lm/react-native-cloudpayments';
+ * import { PaymentService, IPaymentData } from '@lmapp/react-native-cloudpayments';
  *
  * // Инициализация SDK
  * await PaymentService.init('pk_test_1234567890abcdef');
@@ -230,7 +230,7 @@ export interface ICardService {
  *
  * @example Работа с альтернативными способами оплаты
  * ```typescript
- * import { EPaymentMethodType } from '@lm/react-native-cloudpayments';
+ * import { EPaymentMethodType } from '@lmapp/react-native-cloudpayments';
  *
  * // Оплата через Tinkoff Pay
  * const tpayResult = await PaymentService.getIntentWaitStatus(
@@ -363,7 +363,7 @@ export interface IPaymentService {
    *
    * @example Оплата через Tinkoff Pay
    * ```typescript
-   * import { EPaymentMethodType } from '@lm/react-native-cloudpayments';
+   * import { EPaymentMethodType } from '@lmapp/react-native-cloudpayments';
    *
    * const result = await PaymentService.getIntentWaitStatus(
    *   paymentData,

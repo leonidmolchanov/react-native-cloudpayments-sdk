@@ -88,7 +88,7 @@ cd ..
 
 ```typescript
 // Проверка доступности Apple Pay
-import { PaymentService } from '@lm/react-native-cloudpayments';
+import { PaymentService } from '@lmapp/react-native-cloudpayments';
 
 const checkApplePay = async () => {
   try {

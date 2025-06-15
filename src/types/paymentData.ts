@@ -17,7 +17,7 @@
  *
  * @example Создание базовых данных платежа
  * ```typescript
- * import { IBasePaymentData } from '@lm/react-native-cloudpayments';
+ * import { IBasePaymentData } from '@lmapp/react-native-cloudpayments';
  *
  * const paymentData: IBasePaymentData = {
  *   publicId: 'pk_test_1234567890abcdef', // Ваш Public ID из личного кабинета
@@ -102,7 +102,7 @@ export interface IBasePaymentData {
  *
  * @example Настройка платежной формы
  * ```typescript
- * import { IPaymentConfigurationData } from '@lm/react-native-cloudpayments';
+ * import { IPaymentConfigurationData } from '@lmapp/react-native-cloudpayments';
  *
  * const config: IPaymentConfigurationData = {
  *   requireEmail: true,                    // Обязательный ввод email
@@ -194,7 +194,7 @@ export interface IPaymentConfigurationData {
  *
  * @example Создание полных данных платежа
  * ```typescript
- * import { IPaymentData, PaymentService } from '@lm/react-native-cloudpayments';
+ * import { IPaymentData, PaymentService } from '@lmapp/react-native-cloudpayments';
  *
  * const paymentData: IPaymentData = {
  *   // Базовые данные платежа
@@ -238,7 +238,7 @@ export interface IPaymentData
  *
  * @example Создание Intent для TPay
  * ```typescript
- * import { ICreateIntentPaymentData, PaymentService, EPaymentMethodType } from '@lm/react-native-cloudpayments';
+ * import { ICreateIntentPaymentData, PaymentService, EPaymentMethodType } from '@lmapp/react-native-cloudpayments';
  *
  * const intentData: ICreateIntentPaymentData = {
  *   publicId: 'pk_test_1234567890abcdef',

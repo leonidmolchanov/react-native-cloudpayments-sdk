@@ -17,8 +17,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useCloudPayments } from '@lm/react-native-cloudpayments';
-import type { IPaymentData } from '@lm/react-native-cloudpayments';
+import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
+import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
 
 // ============================================================================
 // CONFIGURATION

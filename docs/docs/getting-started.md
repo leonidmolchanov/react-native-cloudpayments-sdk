@@ -20,13 +20,13 @@ sidebar_position: 2
 ### 1. Установка пакета
 
 ```bash
-npm install @lm/react-native-cloudpayments
+npm install @lmapp/react-native-cloudpayments
 ```
 
 или с Yarn:
 
 ```bash
-yarn add @lm/react-native-cloudpayments
+yarn add @lmapp/react-native-cloudpayments
 ```
 
 ### 2. Установка зависимостей для iOS
@@ -58,7 +58,7 @@ SDK использует React Native автолинковку, поэтому �
 ### 1. Инициализация SDK
 
 ```typescript
-import { PaymentService } from '@lm/react-native-cloudpayments';
+import { PaymentService } from '@lmapp/react-native-cloudpayments';
 
 // В начале приложения (например, в App.tsx)
 const initializePayments = async () => {
@@ -79,7 +79,7 @@ initializePayments();
 ```typescript
 import React from 'react';
 import { View, Button, Alert } from 'react-native';
-import { usePaymentForm } from '@lm/react-native-cloudpayments';
+import { usePaymentForm } from '@lmapp/react-native-cloudpayments';
 
 const PaymentScreen = () => {
   const presentPaymentForm = usePaymentForm('pk_test_your_public_id_here');
@@ -125,7 +125,7 @@ export default PaymentScreen;
 ### 3. Обработка событий платежа
 
 ```typescript
-import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
 
 // Подписка на события платежной формы
 useEffect(() => {

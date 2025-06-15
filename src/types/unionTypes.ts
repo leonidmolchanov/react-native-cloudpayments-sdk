@@ -29,7 +29,7 @@ import type {
  *
  * @example Обработка разных типов событий
  * ```typescript
- * import { eventEmitter } from '@lm/react-native-cloudpayments';
+ * import { eventEmitter } from '@lmapp/react-native-cloudpayments';
  *
  * const handlePaymentFormEvent = (eventData: TPaymentFormEventData) => {
  *   if ('action' in eventData) {
@@ -85,7 +85,7 @@ type EventDataMap = {
  *
  * @example Типизированная подписка на конкретное событие
  * ```typescript
- * import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+ * import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
  *
  * // TypeScript автоматически выведет правильный тип данных
  * eventEmitter.addListener(
@@ -156,7 +156,7 @@ export type TCloudPaymentsEventData<
  *
  * @example Обработка статуса Intent
  * ```typescript
- * import { PaymentService, EPaymentMethodType } from '@lm/react-native-cloudpayments';
+ * import { PaymentService, EPaymentMethodType } from '@lmapp/react-native-cloudpayments';
  *
  * const waitForIntentCompletion = async () => {
  *   try {

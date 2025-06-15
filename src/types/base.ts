@@ -19,7 +19,7 @@ import type { EPaymentFormEventName, EPaymentFormErrorCode } from './enums';
  *
  * @example Обработка базового ответа
  * ```typescript
- * import { PaymentService } from '@lm/react-native-cloudpayments';
+ * import { PaymentService } from '@lmapp/react-native-cloudpayments';
  *
  * const result = await PaymentService.presentPaymentForm(paymentData);
  * if (result.success) {
@@ -83,7 +83,7 @@ export interface IBaseResponseWithTransaction extends IBaseResponse {
  *
  * @example Обработка ошибок с кодами
  * ```typescript
- * import { EPaymentFormErrorCode } from '@lm/react-native-cloudpayments';
+ * import { EPaymentFormErrorCode } from '@lmapp/react-native-cloudpayments';
  *
  * try {
  *   await PaymentService.presentPaymentForm(paymentData);
@@ -130,7 +130,7 @@ export interface IBaseError {
  *
  * @example Подписка на события с типизированными данными
  * ```typescript
- * import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+ * import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
  *
  * // Подписка на событие успешного платежа
  * eventEmitter.addListener(EPaymentFormEventName.PAYMENT_SUCCESS, (eventData) => {

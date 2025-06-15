@@ -34,7 +34,7 @@ import type { TIntentWaitStatus } from './unionTypes';
  *
  * @example Использование через PaymentService (рекомендуется)
  * ```typescript
- * import { PaymentService } from '@lm/react-native-cloudpayments';
+ * import { PaymentService } from '@lmapp/react-native-cloudpayments';
  *
  * // Вместо прямого вызова TurboModule
  * // const result = await NativeCloudpaymentsSdk.presentPaymentForm(paymentData);
@@ -46,7 +46,7 @@ import type { TIntentWaitStatus } from './unionTypes';
  * @example Прямое использование TurboModule (не рекомендуется)
  * ```typescript
  * import { NativeModules } from 'react-native';
- * import type { ICloudpaymentsSdkSpec } from '@lm/react-native-cloudpayments';
+ * import type { ICloudpaymentsSdkSpec } from '@lmapp/react-native-cloudpayments';
  *
  * const CloudpaymentsModule = NativeModules.CloudpaymentsSdk as ICloudpaymentsSdkSpec;
  *

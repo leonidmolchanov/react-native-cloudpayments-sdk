@@ -3752,9 +3752,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lm/react-native-cloudpayments-docs@workspace:docs":
+"@lmapp/react-native-cloudpayments-docs@workspace:docs":
   version: 0.0.0-use.local
-  resolution: "@lm/react-native-cloudpayments-docs@workspace:docs"
+  resolution: "@lmapp/react-native-cloudpayments-docs@workspace:docs"
   dependencies:
     "@docusaurus/core": ^3.6.3
     "@docusaurus/module-type-aliases": ^3.6.3
@@ -3770,15 +3770,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lm/react-native-cloudpayments-example@workspace:example":
+"@lmapp/react-native-cloudpayments-example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "@lm/react-native-cloudpayments-example@workspace:example"
+  resolution: "@lmapp/react-native-cloudpayments-example@workspace:example"
   dependencies:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
     "@hookform/resolvers": ^5.1.1
-    "@lm/react-native-cloudpayments": "link:../"
+    "@lmapp/react-native-cloudpayments": "link:../"
     "@react-native-community/cli": 18.0.0
     "@react-native-community/cli-platform-android": 18.0.0
     "@react-native-community/cli-platform-ios": 18.0.0
@@ -3795,15 +3795,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lm/react-native-cloudpayments@link:../::locator=%40lm%2Freact-native-cloudpayments-example%40workspace%3Aexample":
+"@lmapp/react-native-cloudpayments@link:../::locator=%40lmapp%2Freact-native-cloudpayments-example%40workspace%3Aexample":
   version: 0.0.0-use.local
-  resolution: "@lm/react-native-cloudpayments@link:../::locator=%40lm%2Freact-native-cloudpayments-example%40workspace%3Aexample"
+  resolution: "@lmapp/react-native-cloudpayments@link:../::locator=%40lmapp%2Freact-native-cloudpayments-example%40workspace%3Aexample"
   languageName: node
   linkType: soft
 
-"@lm/react-native-cloudpayments@workspace:.":
+"@lmapp/react-native-cloudpayments@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@lm/react-native-cloudpayments@workspace:."
+  resolution: "@lmapp/react-native-cloudpayments@workspace:."
   dependencies:
     "@commitlint/config-conventional": ^19.6.0
     "@eslint/compat": ^1.2.7

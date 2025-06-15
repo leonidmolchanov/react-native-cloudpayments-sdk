@@ -28,11 +28,11 @@ function HomepageHeader() {
         </div>
         <div className={styles.badges}>
           <img
-            src="https://img.shields.io/npm/v/@lm/react-native-cloudpayments.svg"
+            src="https://img.shields.io/npm/v/@lmapp/react-native-cloudpayments.svg"
             alt="npm version"
           />
           <img
-            src="https://img.shields.io/npm/dm/@lm/react-native-cloudpayments.svg"
+            src="https://img.shields.io/npm/dm/@lmapp/react-native-cloudpayments.svg"
             alt="npm downloads"
           />
           <img
@@ -79,10 +79,10 @@ export default function Home(): ReactNode {
                 <div className={styles.codeBlock}>
                   <pre>
                     <code>{`# Установка
-npm install @lm/react-native-cloudpayments
+npm install @lmapp/react-native-cloudpayments
 
 # Использование
-import { usePaymentForm } from '@lm/react-native-cloudpayments';
+import { usePaymentForm } from '@lmapp/react-native-cloudpayments';
 
 const MyComponent = () => {
   const presentPaymentForm = usePaymentForm('pk_test_your_public_id');
