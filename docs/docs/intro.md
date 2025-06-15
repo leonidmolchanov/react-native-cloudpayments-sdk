@@ -41,15 +41,15 @@ CloudPayments React Native SDK предоставляет полный набо�
 ### 1. Установка
 
 ```bash
-npm install @lm/react-native-cloudpayments
+npm install @lmapp/react-native-cloudpayments
 # или
-yarn add @lm/react-native-cloudpayments
+yarn add @lmapp/react-native-cloudpayments
 ```
 
 ### 2. Инициализация
 
 ```typescript
-import { PaymentService } from '@lm/react-native-cloudpayments';
+import { PaymentService } from '@lmapp/react-native-cloudpayments';
 
 // Инициализация SDK с вашим Public ID
 await PaymentService.init('pk_test_your_public_id');
@@ -58,7 +58,7 @@ await PaymentService.init('pk_test_your_public_id');
 ### 3. Запуск платежной формы
 
 ```typescript
-import { usePaymentForm } from '@lm/react-native-cloudpayments';
+import { usePaymentForm } from '@lmapp/react-native-cloudpayments';
 
 const MyComponent = () => {
   const presentPaymentForm = usePaymentForm('pk_test_your_public_id');

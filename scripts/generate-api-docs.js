@@ -184,7 +184,7 @@ sidebar_position: 1
 ### Базовый платеж
 
 \`\`\`typescript
-import { usePaymentForm } from '@lm/react-native-cloudpayments';
+import { usePaymentForm } from '@lmapp/react-native-cloudpayments';
 
 const presentPaymentForm = usePaymentForm('pk_test_your_public_id');
 
@@ -198,7 +198,7 @@ const result = await presentPaymentForm({
 ### Обработка событий
 
 \`\`\`typescript
-import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
 
 eventEmitter.addListener(EPaymentFormEventName.PAYMENT_FORM, (event) => {
   console.log('Событие платежной формы:', event);

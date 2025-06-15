@@ -29,7 +29,7 @@ import type {
  *
  * @example Базовое использование
  * ```typescript
- * import { useCloudPayments } from '@lm/react-native-cloudpayments';
+ * import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
  *
  * const PaymentScreen = () => {
  *   const [presentPaymentForm, { isLoading, isError, error, transactionId }] = useCloudPayments(

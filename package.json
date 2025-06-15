@@ -1,5 +1,5 @@
 {
-  "name": "@lm/react-native-cloudpayments",
+  "name": "@lmapp/react-native-cloudpayments",
   "version": "0.1.0",
   "description": "CloudPayments SDK for React Native",
   "main": "./lib/module/index.js",
@@ -32,7 +32,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace @lm/react-native-cloudpayments-example",
+    "example": "yarn workspace @lmapp/react-native-cloudpayments-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -45,8 +45,8 @@
     "release:patch": "standard-version --release-as patch",
     "release:test": "./scripts/test-release.sh",
     "generate-api": "node scripts/generate-api-docs.js",
-    "docs:dev": "yarn workspace @lm/react-native-cloudpayments-docs start",
-    "docs:build": "yarn workspace @lm/react-native-cloudpayments-docs build"
+    "docs:dev": "yarn workspace @lmapp/react-native-cloudpayments-docs start",
+    "docs:build": "yarn workspace @lmapp/react-native-cloudpayments-docs build"
   },
   "keywords": [
     "react-native",

@@ -6,8 +6,8 @@
 
 **Мощный и простой в использовании SDK для интеграции платежей CloudPayments в React Native приложения**
 
-[![npm version](https://img.shields.io/npm/v/@lm/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lm/react-native-cloudpayments)
-[![npm downloads](https://img.shields.io/npm/dm/@lm/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lm/react-native-cloudpayments)
+[![npm version](https://img.shields.io/npm/v/@lmapp/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
+[![npm downloads](https://img.shields.io/npm/dm/@lmapp/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
 [![License](https://img.shields.io/github/license/lm/react-native-cloudpayments.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)](https://reactnative.dev/)
 
@@ -40,9 +40,9 @@
 ### 1. Установка
 
 ```bash
-npm install @lm/react-native-cloudpayments
+npm install @lmapp/react-native-cloudpayments
 # или
-yarn add @lm/react-native-cloudpayments
+yarn add @lmapp/react-native-cloudpayments
 ```
 
 ### 2. Установка зависимостей
@@ -59,7 +59,7 @@ cd ios && pod install && cd ..
 ```typescript
 import React from 'react';
 import { Button, Alert } from 'react-native';
-import { usePaymentForm, PaymentService } from '@lm/react-native-cloudpayments';
+import { usePaymentForm, PaymentService } from '@lmapp/react-native-cloudpayments';
 
 // Инициализация SDK
 await PaymentService.init('pk_test_your_public_id');
@@ -128,7 +128,7 @@ const result = await presentPaymentForm({
 ### События
 
 ```typescript
-import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
 
 eventEmitter.addListener(EPaymentFormEventName.PAYMENT_FORM, (event) => {
   switch (event.action) {

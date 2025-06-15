@@ -13,7 +13,7 @@ sidebar_position: 1
 ### Простейший пример
 
 ```typescript
-import { usePaymentForm } from '@lm/react-native-cloudpayments';
+import { usePaymentForm } from '@lmapp/react-native-cloudpayments';
 
 const PaymentScreen = () => {
   const presentPaymentForm = usePaymentForm('pk_test_your_public_id');
@@ -187,7 +187,7 @@ SDK автоматически определяет язык устройств�
 ### 1. Подписка на события формы
 
 ```typescript
-import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
 
 useEffect(() => {
   const subscription = eventEmitter.addListener(

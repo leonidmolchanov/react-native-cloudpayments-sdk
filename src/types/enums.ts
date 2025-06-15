@@ -18,7 +18,7 @@
  *
  * @example Использование способов оплаты
  * ```typescript
- * import { EPaymentMethodType } from '@lm/react-native-cloudpayments';
+ * import { EPaymentMethodType } from '@lmapp/react-native-cloudpayments';
  *
  * // Проверка статуса для разных способов оплаты
  * const tpayStatus = await PaymentService.getIntentWaitStatus(
@@ -77,7 +77,7 @@ export enum EPaymentMethodType {
  *
  * @example Обработка ошибок платежа
  * ```typescript
- * import { PaymentService, EPaymentFormErrorCode } from '@lm/react-native-cloudpayments';
+ * import { PaymentService, EPaymentFormErrorCode } from '@lmapp/react-native-cloudpayments';
  *
  * try {
  *   const result = await PaymentService.presentPaymentForm(paymentData);
@@ -226,7 +226,7 @@ export enum EPaymentFormErrorCode {
  *
  * @example Подписка на события платежной формы
  * ```typescript
- * import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+ * import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
  *
  * // Подписка на события платежной формы
  * eventEmitter.addListener(

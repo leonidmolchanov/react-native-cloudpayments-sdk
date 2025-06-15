@@ -207,9 +207,9 @@ yarn generate-api
 
 **npm registry:**
 ```bash
-npm install @lm/react-native-cloudpayments
+npm install @lmapp/react-native-cloudpayments
 # или
-yarn add @lm/react-native-cloudpayments
+yarn add @lmapp/react-native-cloudpayments
 ```
 
 **GitHub Packages:**
@@ -223,7 +223,7 @@ npm install @leonidmolchanov/react-native-cloudpayments
 yarn add @leonidmolchanov/react-native-cloudpayments
 ```
 
-- **npm**: [npm package](https://www.npmjs.com/package/@lm/react-native-cloudpayments)
+- **npm**: [npm package](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
 - **GitHub Packages**: [GitHub Packages](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/pkgs/npm/react-native-cloudpayments)
 
 ### Changelog

@@ -39,7 +39,7 @@ export interface ICloudPaymentsBaseEvent {
  *
  * @example Обработка событий платежной формы
  * ```typescript
- * import { eventEmitter, EPaymentFormEventName } from '@lm/react-native-cloudpayments';
+ * import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
  *
  * eventEmitter.addListener(EPaymentFormEventName.PAYMENT_FORM, (event: IPaymentFormEvent) => {
  *   switch (event.action) {

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@lm/react-native-cloudpayments": ["./src/index"]
+      "@lmapp/react-native-cloudpayments": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
