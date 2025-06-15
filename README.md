@@ -6,10 +6,18 @@
 
 **Мощный и простой в использовании SDK для интеграции платежей CloudPayments в React Native приложения**
 
-[![npm version](https://img.shields.io/npm/v/@lmapp/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
-[![npm downloads](https://img.shields.io/npm/dm/@lmapp/react-native-cloudpayments.svg)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
-[![License](https://img.shields.io/github/license/lm/react-native-cloudpayments.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)](https://reactnative.dev/)
+[![npm version](https://img.shields.io/npm/v/@lmapp/react-native-cloudpayments.svg?color=brightgreen)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
+[![npm downloads](https://img.shields.io/npm/dm/@lmapp/react-native-cloudpayments.svg?color=brightgreen)](https://www.npmjs.com/package/@lmapp/react-native-cloudpayments)
+[![License](https://img.shields.io/github/license/leonidmolchanov/react-native-cloudpayments-sdk.svg?color=brightgreen)](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/blob/main/LICENSE)
+[![iOS](https://img.shields.io/badge/iOS-12.0+-brightgreen.svg)](https://developer.apple.com/ios/)
+[![Android](https://img.shields.io/badge/Android-API%2021+-brightgreen.svg)](https://developer.android.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-brightgreen.svg)](https://www.typescriptlang.org/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.70+-brightgreen.svg)](https://reactnative.dev/)
+
+[![Apple Pay](https://img.shields.io/badge/Apple%20Pay-✅-brightgreen.svg)](https://developer.apple.com/apple-pay/)
+[![Google Pay](https://img.shields.io/badge/Google%20Pay-✅-brightgreen.svg)](https://developers.google.com/pay)
+[![СБП](https://img.shields.io/badge/СБП-✅-brightgreen.svg)](https://sbp.nspk.ru/)
+[![PCI DSS](https://img.shields.io/badge/PCI%20DSS-Compliant-brightgreen.svg)](https://www.pcisecuritystandards.org/)
 
 [📖 Документация](https://leonidmolchanov.github.io/react-native-cloudpayments-sdk/) • [🚀 Быстрый старт](#-быстрый-старт) • [💳 Способы оплаты](#-способы-оплаты) • [🔧 API](#-api)
 
