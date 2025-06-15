@@ -66,6 +66,23 @@ jobs:
           yarn release:auto
           git push --follow-tags origin main
 
+      - name: Create GitHub Release
+        if: steps.changes.outputs.src == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Получаем последний тег
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          
+          # Извлекаем changelog для этой версии
+          CHANGELOG_CONTENT=$(sed -n "/## \[${LATEST_TAG#v}\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          
+          # Создаем GitHub релиз
+          gh release create "$LATEST_TAG" \
+            --title "Release $LATEST_TAG" \
+            --notes "$CHANGELOG_CONTENT" \
+            --generate-notes
+
       - name: Publish to npm
         if: steps.changes.outputs.src == 'true'
         env:
