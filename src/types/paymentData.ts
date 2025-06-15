@@ -184,6 +184,8 @@ export interface IPaymentConfigurationData {
    * @default true
    */
   showResultScreen?: boolean;
+
+  enableCardScanner?:boolean
 }
 
 /**
