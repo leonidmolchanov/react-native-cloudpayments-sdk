@@ -17,13 +17,16 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
+import {
+  useCloudPayments,
+  ECardIOLanguage,
+  ECardIOColorScheme,
+} from '@lmapp/react-native-cloudpayments';
 import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
 import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-
 /**
  * ⚠️ ВАЖНО: Обязательно укажите ваш публичный ключ CloudPayments
  *
@@ -101,11 +104,11 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
     suppressManualEntry: false,
 
     // Цветовая схема
-    actionBarColor: '#2196F3',
-    guideColor: '#4CAF50',
+    actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
+    guideColor: ECardIOColorScheme.MATERIAL_GREEN,
 
     // Локализация
-    language: 'ru',
+    language: ECardIOLanguage.RUSSIAN,
 
     // Дополнительные настройки
     suppressConfirmation: false,
