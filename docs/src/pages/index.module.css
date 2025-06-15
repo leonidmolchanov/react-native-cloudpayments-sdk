@@ -1,0 +1,236 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.badges img {
+  height: 20px;
+}
+
+.authorInfo {
+  margin-top: 1rem;
+  opacity: 0.9;
+}
+
+.authorInfo p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.authorInfo a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.authorInfo a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+/* Quick Start Section */
+.quickStart {
+  padding: 4rem 0;
+  background-color: var(--ifm-background-color);
+}
+
+.quickStart h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.codeBlock {
+  background: var(--ifm-code-background);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.codeBlock pre {
+  margin: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.codeBlock code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Payment Methods Section */
+.paymentMethods {
+  padding: 4rem 0;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.paymentMethods h2 {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+}
+
+.methodsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.methodCard {
+  background: var(--ifm-background-color);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.methodCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.methodIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.methodCard h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: var(--ifm-heading-color);
+}
+
+.methodCard p {
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 1.5rem;
+}
+
+.platforms {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.platforms span {
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ios {
+  background: #007AFF;
+  color: white;
+}
+
+.android {
+  background: #34C759;
+  color: white;
+}
+
+/* CTA Section */
+.cta {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+  color: white;
+  text-align: center;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.cta p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.ctaButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ctaButtons .button {
+  margin: 0.5rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .methodsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .ctaButtons {
+    flex-direction: column;
+  }
+  
+  .ctaButtons .button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .badges {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .authorInfo p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .methodCard {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .codeBlock {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
