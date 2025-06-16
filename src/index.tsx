@@ -24,7 +24,7 @@ export { PaymentService, CardService } from './services';
 export type * from './types';
 
 // Экспорт енумов как значений
-export { ECardIOLanguage, ECardIOColorScheme } from './types/enums';
+export * from './types/enums';
 
 // Экспорт событий
 export { eventEmitter } from './events';

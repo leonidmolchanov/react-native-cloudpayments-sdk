@@ -1,7 +1,7 @@
 /**
  * @fileoverview Хук для управления событиями CloudPayments SDK
  * @description Базовый хук для подписки на события и управления состоянием SDK
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

@@ -1,7 +1,7 @@
 /**
  * @fileoverview CloudPayments SDK Example App
  * @description Демонстрационное приложение для тестирования CloudPayments SDK
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 
@@ -17,16 +17,19 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import {
-  useCloudPayments,
-  ECardIOLanguage,
-  ECardIOColorScheme,
+import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
+import type {
+  IPaymentData,
+  ReceiptItem,
+  Amounts,
+  Receipt,
+  IPayer,
 } from '@lmapp/react-native-cloudpayments';
-import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
 import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
+
 /**
  * ⚠️ ВАЖНО: Обязательно укажите ваш публичный ключ CloudPayments
  *
@@ -81,6 +84,76 @@ const SECTIONS: ISection[] = [
   },
 ];
 
+// ============================================================================
+// ТИПИЗИРОВАННЫЕ ДАННЫЕ
+// ============================================================================
+
+// Товары в чеке
+const receiptItems: ReceiptItem[] = [
+  {
+    label: 'Премиум подписка',
+    price: 999,
+    quantity: 1,
+    amount: 999,
+    vat: null,
+    method: 4, // Полная предварительная оплата до момента передачи предмета расчета
+    object: 4, // Услуга
+  },
+  {
+    label: 'Доставка',
+    price: 1,
+    quantity: 1,
+    amount: 1,
+    vat: null,
+    method: 4,
+    object: 4,
+  },
+];
+
+// Суммы по способам оплаты
+const amounts: Amounts = {
+  electronic: 1000,
+  advancePayment: 0,
+  credit: 0,
+  provision: 0,
+};
+
+// Информация о плательщике
+const payer: IPayer = {
+  firstName: 'Иван',
+  lastName: 'Иванов',
+  middleName: 'Иванович',
+  birth: '1985-01-01',
+  address: 'ул. Ленина, 10',
+  street: 'ул. Ленина',
+  city: 'Москва',
+  country: 'RU',
+  phone: '+79991234567',
+  postcode: '101000',
+};
+
+// Чек онлайн-кассы
+const receipt: Receipt = {
+  items: receiptItems,
+  taxationSystem: 2, // УСН доходы минус расходы
+  isBso: false,
+  amounts: amounts,
+};
+
+// Дополнительные данные (БЕЗ дублирования чека)
+const jsonData = {
+  SubscriptionId: 'com.df.twenty.diamonds',
+  CustomerInfo: {
+    age: 27,
+    loyaltyLevel: 'premium',
+  },
+  OrderInfo: {
+    source: 'mobile_app',
+    campaign: 'summer_2024',
+  },
+};
+
+// Основные данные платежа
 const SAMPLE_PAYMENT_DATA: IPaymentData = {
   amount: '1000.00',
   currency: 'RUB',
@@ -90,6 +163,9 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   publicId: PUBLIC_ID,
   requireEmail: true,
   showResultScreen: true,
+  payer: payer,
+  receipt: receipt,
+  jsonData: jsonData,
   enableCardScanner: true, // Включаем сканер карт для Android
   cardScannerConfig: {
     // Настройки полей карты
@@ -104,11 +180,11 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
     suppressManualEntry: false,
 
     // Цветовая схема
-    actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
-    guideColor: ECardIOColorScheme.MATERIAL_GREEN,
-
-    // Локализация
-    language: ECardIOLanguage.RUSSIAN,
+    // actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
+    // guideColor: ECardIOColorScheme.MATERIAL_GREEN,
+    //
+    // // Локализация
+    // language: ECardIOLanguage.RUSSIAN,
 
     // Дополнительные настройки
     suppressConfirmation: false,

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Хук для работы с платежной формой CloudPayments
  * @description Специализированный хук для запуска платежной формы CloudPayments
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

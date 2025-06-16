@@ -1,7 +1,7 @@
 /**
  * @fileoverview Перечисления (Enums) для CloudPayments SDK
  * @description Содержит все enum'ы, используемые в CloudPayments SDK для React Native
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

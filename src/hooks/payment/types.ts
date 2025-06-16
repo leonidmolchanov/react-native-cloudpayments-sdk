@@ -1,7 +1,7 @@
 /**
  * @fileoverview Типы для хуков платежей CloudPayments SDK
  * @description Содержит интерфейсы и типы для хуков различных методов оплаты
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

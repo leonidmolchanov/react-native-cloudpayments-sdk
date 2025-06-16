@@ -41,33 +41,61 @@ public class CloudpaymentsCardIOService: NSObject {
 // MARK: - PaymentCardScanner Protocol
 
 extension CloudpaymentsCardIOService: PaymentCardScanner {
-  public func startScanner(completion: @escaping (String?, UInt?, UInt?, String?) -> Void) -> UIViewController? {
-return nil
-  }
-  
-
+    
     /**
      * Запуск сканера карт
      * @param completion Callback с результатами сканирования (номер, месяц, год, CVV)
      * @return UIViewController для презентации или nil при ошибке
      */
-//    public func startScanner(completion: @escaping (String?, UInt?, UInt?, String?) -> Void) -> UIViewController? {
-//        // Сохраняем callback для передачи результатов
-//        self.scannerCompletion = completion
-//
-//        // Создаем CardIO контроллер
-//      guard let scanController = CardIOPaymentViewController(paymentDelegate: self) else {
-//          print("Ошибка инициализации CardIO")
-//          return nil
-//      }
-//
-//        // Базовые настройки
-////      scanController?.collectExpiry = true
-////      scanController?.collectCVV = false
-////      scanController?.hideCardIOLogo = true
-//
-//        return scanController
-//    }
+    public func startScanner(completion: @escaping (String?, UInt?, UInt?, String?) -> Void) -> UIViewController? {
+        print("🔍 CloudpaymentsCardIOService.startScanner: Запуск")
+        
+        // Сохраняем callback для передачи результатов
+        self.scannerCompletion = completion
+
+        // Создаем CardIO контроллер
+        guard let scanController = CardIOPaymentViewController(paymentDelegate: self) else {
+            print("❌ CloudpaymentsCardIOService.startScanner: Ошибка инициализации CardIO")
+            return nil
+        }
+
+        print("✅ CloudpaymentsCardIOService.startScanner: CardIO контроллер создан")
+        
+        // Базовые настройки
+        scanController.collectExpiry = true
+        scanController.collectCVV = false
+        scanController.hideCardIOLogo = true
+        
+        // Применяем конфигурацию если есть
+        if let config = self.config {
+            applyConfig(to: scanController, config: config)
+        }
+
+        return scanController
+    }
+    
+    /**
+     * Применение конфигурации к CardIO контроллеру
+     */
+    private func applyConfig(to controller: CardIOPaymentViewController, config: [String: Any]) {
+        if let collectExpiry = config["collectExpiry"] as? Bool {
+            controller.collectExpiry = collectExpiry
+        }
+        
+        if let collectCVV = config["collectCVV"] as? Bool {
+            controller.collectCVV = collectCVV
+        }
+        
+        if let hideCardIOLogo = config["hideCardIOLogo"] as? Bool {
+            controller.hideCardIOLogo = hideCardIOLogo
+        }
+        
+        if let allowFreelyRotatingCardGuide = config["allowFreelyRotatingCardGuide"] as? Bool {
+            controller.allowFreelyRotatingCardGuide = allowFreelyRotatingCardGuide
+        }
+        
+        print("✅ CloudpaymentsCardIOService: Конфигурация применена")
+    }
 }
 
 // MARK: - CardIOPaymentViewControllerDelegate
@@ -78,6 +106,7 @@ extension CloudpaymentsCardIOService: CardIOPaymentViewControllerDelegate {
      * Пользователь отменил сканирование
      */
     public func userDidCancel(_ paymentViewController: CardIOPaymentViewController!) {
+        print("🔍 CloudpaymentsCardIOService: Пользователь отменил сканирование")
         paymentViewController.dismiss(animated: true, completion: nil)
     }
 
@@ -87,6 +116,9 @@ extension CloudpaymentsCardIOService: CardIOPaymentViewControllerDelegate {
      * @param paymentViewController CardIO контроллер
      */
     public func userDidProvide(_ cardInfo: CardIOCreditCardInfo!, in paymentViewController: CardIOPaymentViewController!) {
+        print("🎯 CloudpaymentsCardIOService: Карта отсканирована успешно")
+        print("📱 CloudpaymentsCardIOService: Номер=\(cardInfo.cardNumber ?? "nil"), Месяц=\(cardInfo.expiryMonth), Год=\(cardInfo.expiryYear), CVV=\(cardInfo.cvv ?? "nil")")
+        
         // Передаем данные карты через callback
         self.scannerCompletion?(
             cardInfo.cardNumber,
@@ -98,4 +130,4 @@ extension CloudpaymentsCardIOService: CardIOPaymentViewControllerDelegate {
         // Закрываем сканер
         paymentViewController.dismiss(animated: true, completion: nil)
     }
-}
+} 

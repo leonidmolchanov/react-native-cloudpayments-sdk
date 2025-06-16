@@ -11,7 +11,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
  * @description Класс для отправки событий из нативного Android кода в React Native.
  * Аналогичен iOS EventEmitter, обеспечивает совместимость с JS кодом.
  *
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContext) {

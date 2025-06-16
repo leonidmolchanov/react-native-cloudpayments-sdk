@@ -47,6 +47,7 @@ export const PaymentService: IPaymentService = {
       };
     }
   },
+
   //@ts-ignore
   presentPaymentForm(paymentData: IPaymentData) {
     return CloudpaymentsSdk.presentPaymentForm(paymentData);

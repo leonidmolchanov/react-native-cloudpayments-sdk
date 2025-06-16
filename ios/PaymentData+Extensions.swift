@@ -31,6 +31,7 @@ extension PaymentData {
             )
             setPayer(payer)
         }
+      
 
         if let receiptDict = input["receipt"] as? [String: Any],
            let itemsArray = receiptDict["items"] as? [[String: Any]] {
@@ -78,7 +79,7 @@ extension PaymentData {
             setReceipt(receipt)
         }
 
-        if let recurrentDict = input["recurrent"] as? [String: Any],
+              if let recurrentDict = input["recurrent"] as? [String: Any],
            let interval = recurrentDict["interval"] as? String,
            let period = recurrentDict["period"] as? Int,
            let amount = recurrentDict["amount"] as? Double {
@@ -94,7 +95,7 @@ extension PaymentData {
 
             setRecurrent(recurrent)
         }
-
+   
         setCultureName(input["cultureName"] as? String ?? "RU-ru")
         setDescription(input["description"] as? String)
         setEmail(input["email"] as? String)

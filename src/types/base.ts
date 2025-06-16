@@ -1,7 +1,7 @@
 /**
  * @fileoverview Базовые интерфейсы для CloudPayments SDK
  * @description Содержит базовые типы данных, используемые во всем SDK
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Union типы и mapped типы для CloudPayments SDK
  * @description Содержит сложные типы данных, объединения и маппинги для событий и ответов
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

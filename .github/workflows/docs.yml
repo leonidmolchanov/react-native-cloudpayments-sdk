@@ -2,13 +2,13 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docs/**'
       - 'src/**'
       - '.github/workflows/docs.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docs/**'
 
@@ -20,7 +20,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,4 +53,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        if: github.ref == 'refs/heads/main' 
+        if: github.ref == 'refs/heads/main'

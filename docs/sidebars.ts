@@ -29,7 +29,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: '💳 Использование',
-      items: ['usage/payment-form'],
+      items: ['usage/payment-form', 'usage/receipts'],
     },
   ],
 
