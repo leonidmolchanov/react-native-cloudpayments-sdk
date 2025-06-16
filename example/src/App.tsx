@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
 import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
-
+import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -32,7 +32,7 @@ import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
  *
  * Формат: pk_xxxxxxxxxxxxxxxxxxxxxxxx
  */
-const PUBLIC_ID = ''; // TODO: Замените на ваш ключ!
+const PUBLIC_ID = KEY; // TODO: Замените на ваш ключ!
 
 // ============================================================================
 // TYPES
@@ -78,6 +78,53 @@ const SECTIONS: ISection[] = [
   },
 ];
 
+const data = {
+  SubscriptionId: 'com.df.twenty.diamonds',
+  CloudPayments: {
+    CustomerReceipt: {
+      Items: [
+        {
+          label: 'Оплата товара 1',
+          price: 0.99,
+          quantity: 1,
+          amount: 0.99,
+          vat: null,
+          method: 4,
+          object: 4,
+        },
+        {
+          label: 'Оплата товара 2',
+          price: 0.99,
+          quantity: 1,
+          amount: 0.99,
+          vat: null,
+          method: 4,
+          object: 4,
+        },
+      ],
+      taxationSystem: 2,
+      isBso: false,
+      amounts: {
+        electronic: 0.99,
+        advancePayment: 0,
+        credit: 0,
+        provision: 0,
+      },
+    },
+  },
+};
+const payer = {
+  firstName: 'Иван',
+  lastName: 'Иванов',
+  middleName: 'Иванович',
+  birth: '1985-01-01',
+  address: 'ул. Ленина, 10',
+  street: 'ул. Ленина',
+  city: 'Москва',
+  country: 'RU',
+  phone: '+79991234567',
+  postcode: '101000',
+};
 const SAMPLE_PAYMENT_DATA: IPaymentData = {
   amount: '1000.00',
   currency: 'RUB',
@@ -87,6 +134,29 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   publicId: PUBLIC_ID,
   requireEmail: true,
   showResultScreen: true,
+  payer: payer,
+  receipt: {
+    amounts: {
+      advancePayment: 0,
+      credit: 0,
+      electronic: 0.99,
+      provision: 0,
+    },
+    isBso: false,
+    items: [
+      {
+        amount: 0.99,
+        label: 'Тестовый товар!',
+        method: 4,
+        object: 4,
+        price: 0.99,
+        quantity: 1,
+        vat: null,
+      },
+    ],
+    taxationSystem: 2,
+  },
+  jsonData: data,
 };
 
 // ============================================================================

@@ -42,10 +42,10 @@ const PaymentScreen = () => {
 interface IPaymentData {
   /** Сумма платежа в формате "1000.00" */
   amount: string;
-  
+
   /** Валюта платежа (RUB, USD, EUR) */
   currency: string;
-  
+
   /** Описание платежа */
   description: string;
 }
@@ -56,28 +56,28 @@ interface IPaymentData {
 ```typescript
 interface IPaymentData {
   // Обязательные поля выше...
-  
+
   /** Email плательщика */
   email?: string;
-  
+
   /** Обязательность ввода email */
   requireEmail?: boolean;
-  
+
   /** Номер счета/заказа */
   invoiceId?: string;
-  
+
   /** Дополнительные данные */
   jsonData?: Record<string, any>;
-  
+
   /** Показывать экран результата */
   showResultScreen?: boolean;
-  
+
   /** Apple Pay Merchant ID */
   applePayMerchantId?: string;
-  
+
   /** Показывать кнопку Apple Pay */
   showApplePay?: boolean;
-  
+
   /** Показывать кнопку Google Pay */
   showGooglePay?: boolean;
 }
@@ -94,7 +94,7 @@ const basicPayment = async () => {
     currency: 'RUB',
     description: 'Покупка кофе',
   });
-  
+
   if (result.success) {
     Alert.alert('Успех!', `Платеж прошел. ID: ${result.transactionId}`);
   } else {
@@ -187,7 +187,10 @@ SDK автоматически определяет язык устройств�
 ### 1. Подписка на события формы
 
 ```typescript
-import { eventEmitter, EPaymentFormEventName } from '@lmapp/react-native-cloudpayments';
+import {
+  eventEmitter,
+  EPaymentFormEventName,
+} from '@lmapp/react-native-cloudpayments';
 
 useEffect(() => {
   const subscription = eventEmitter.addListener(
@@ -198,21 +201,21 @@ useEffect(() => {
           console.log('Форма готовится к показу');
           setLoading(true);
           break;
-          
+
         case 'didDisplay':
           console.log('Форма отображена');
           setLoading(false);
           break;
-          
+
         case 'willHide':
           console.log('Форма скрывается');
           break;
-          
+
         case 'didHide':
           console.log('Форма скрыта');
           setPaymentFormVisible(false);
           break;
-          
+
         case 'transaction':
           if (event.statusCode) {
             console.log('Платеж успешен:', event.transactionId);
@@ -237,10 +240,10 @@ const handlePaymentResult = (result: IPaymentFormResponse) => {
   if (result.success) {
     // Успешный платеж
     console.log('Transaction ID:', result.transactionId);
-    
+
     // Отправка на сервер для подтверждения
     confirmPaymentOnServer(result.transactionId);
-    
+
     // Показ экрана успеха
     navigation.navigate('PaymentSuccess', {
       transactionId: result.transactionId,
@@ -248,10 +251,10 @@ const handlePaymentResult = (result: IPaymentFormResponse) => {
   } else {
     // Ошибка платежа
     console.log('Payment failed:', result.message);
-    
+
     // Логирование ошибки
     logPaymentError(result.message);
-    
+
     // Показ ошибки пользователю
     Alert.alert('Ошибка платежа', result.message);
   }
@@ -276,9 +279,9 @@ const confirmPaymentOnServer = async (transactionId: number) => {
       },
       body: JSON.stringify({ transactionId }),
     });
-    
+
     const data = await response.json();
-    
+
     if (data.confirmed) {
       console.log('Платеж подтвержден на сервере');
     } else {
@@ -311,11 +314,11 @@ const goodExample = {
 
 ### Тестовые карты
 
-| Номер карты | Результат | CVV | Срок |
-|-------------|-----------|-----|------|
+| Номер карты           | Результат       | CVV   | Срок    |
+| --------------------- | --------------- | ----- | ------- |
 | `4111 1111 1111 1111` | Успешный платеж | `123` | `12/25` |
 | `4000 0000 0000 0002` | Отклонен банком | `123` | `12/25` |
-| `4000 0000 0000 0077` | Требует 3DS | `123` | `12/25` |
+| `4000 0000 0000 0077` | Требует 3DS     | `123` | `12/25` |
 
 :::tip Важно
 Всегда используйте тестовый Public ID (начинается с `pk_test_`) для разработки!
@@ -332,19 +335,25 @@ const handlePaymentError = (error: any) => {
       case 'NETWORK_ERROR':
         Alert.alert('Ошибка сети', 'Проверьте подключение к интернету');
         break;
-        
+
       case 'INVALID_CARD':
-        Alert.alert('Неверные данные карты', 'Проверьте номер карты и срок действия');
+        Alert.alert(
+          'Неверные данные карты',
+          'Проверьте номер карты и срок действия'
+        );
         break;
-        
+
       case 'INSUFFICIENT_FUNDS':
-        Alert.alert('Недостаточно средств', 'На карте недостаточно средств для оплаты');
+        Alert.alert(
+          'Недостаточно средств',
+          'На карте недостаточно средств для оплаты'
+        );
         break;
-        
+
       case 'CARD_BLOCKED':
         Alert.alert('Карта заблокирована', 'Обратитесь в ваш банк');
         break;
-        
+
       default:
         Alert.alert('Ошибка платежа', error.message || 'Неизвестная ошибка');
     }
@@ -359,7 +368,7 @@ const handlePaymentError = (error: any) => {
 ```typescript
 const paymentWithRetry = async (maxRetries = 3) => {
   let attempt = 0;
-  
+
   while (attempt < maxRetries) {
     try {
       const result = await presentPaymentForm({
@@ -367,13 +376,13 @@ const paymentWithRetry = async (maxRetries = 3) => {
         currency: 'RUB',
         description: 'Платеж с повторами',
       });
-      
+
       if (result.success) {
         return result;
       } else if (result.message?.includes('network')) {
         // Повторяем только при сетевых ошибках
         attempt++;
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       } else {
         // Не повторяем при других ошибках
         throw new Error(result.message);
@@ -399,7 +408,7 @@ const PaymentComponent = () => {
 
   const handlePayment = async () => {
     setIsLoading(true);
-    
+
     try {
       // Показываем индикатор загрузки
       const result = await presentPaymentForm({
@@ -408,7 +417,7 @@ const PaymentComponent = () => {
         description: 'Покупка товара',
         showResultScreen: true, // Показываем результат в форме
       });
-      
+
       if (result.success) {
         // Переходим на экран успеха
         navigation.navigate('Success');
@@ -437,10 +446,7 @@ const PaymentComponent = () => {
 
 ```typescript
 // ✅ Мемоизируйте функцию платежа
-const presentPaymentForm = useMemo(
-  () => usePaymentForm(publicId),
-  [publicId]
-);
+const presentPaymentForm = useMemo(() => usePaymentForm(publicId), [publicId]);
 
 // ✅ Предзагружайте данные
 useEffect(() => {
@@ -457,4 +463,4 @@ useEffect(() => {
 
 ---
 
-**Готово!** 🎉 Теперь вы знаете все о работе с платежной формой CloudPayments! 
+**Готово!** 🎉 Теперь вы знаете все о работе с платежной формой CloudPayments!

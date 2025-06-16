@@ -79,7 +79,7 @@ dependencies {
         <domain includeSubdomains="true">api.cloudpayments.ru</domain>
         <domain includeSubdomains="true">widget.cloudpayments.ru</domain>
     </domain-config>
-    
+
     <!-- Для тестирования в debug режиме -->
     <debug-overrides>
         <trust-anchors>
@@ -101,11 +101,11 @@ dependencies {
     android:allowBackup="false"
     android:theme="@style/AppTheme"
     android:networkSecurityConfig="@xml/network_security_config">
-    
+
     <!-- Разрешения для интернета -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
+
     <!-- Основная активность -->
     <activity
         android:name=".MainActivity"
@@ -166,7 +166,7 @@ const checkGooglePay = async () => {
 ```xml title="android/app/src/main/AndroidManifest.xml"
 <activity android:name=".MainActivity">
     <!-- Основные intent-filter -->
-    
+
     <!-- Для возврата из банковских приложений -->
     <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
@@ -176,7 +176,7 @@ const checkGooglePay = async () => {
               android:host="yourapp.com"
               android:pathPrefix="/payment" />
     </intent-filter>
-    
+
     <!-- Для Tinkoff Pay -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
@@ -199,7 +199,7 @@ useEffect(() => {
   };
 
   const subscription = Linking.addEventListener('url', handleDeepLink);
-  
+
   return () => subscription?.remove();
 }, []);
 ```
@@ -217,7 +217,7 @@ useEffect(() => {
         <item name="colorPrimary">#007AFF</item>
         <item name="colorPrimaryDark">#0056CC</item>
         <item name="colorAccent">#007AFF</item>
-        
+
         <!-- Цвета для платежной формы -->
         <item name="cloudpayments_primary_color">#007AFF</item>
         <item name="cloudpayments_accent_color">#34C759</item>
@@ -362,4 +362,4 @@ adb shell input keyevent 82
 
 ---
 
-**Готово!** 🎉 Ваше Android приложение готово к приему платежей через CloudPayments! 
+**Готово!** 🎉 Ваше Android приложение готово к приему платежей через CloudPayments!

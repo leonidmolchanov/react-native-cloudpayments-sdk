@@ -37,7 +37,7 @@ target 'YourApp' do
 
   # CloudPayments SDK зависимости
   pod 'CloudPayments', '~> 1.4.0'
-  
+
   target 'YourAppTests' do
     inherit! :complete
   end
@@ -48,7 +48,7 @@ target 'YourApp' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    
+
     # Настройка deployment target
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
@@ -122,7 +122,7 @@ const paymentData = {
 ```xml title="ios/YourApp/Info.plist"
 <dict>
     <!-- Другие настройки -->
-    
+
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSExceptionDomains</key>
@@ -197,7 +197,7 @@ useEffect(() => {
   };
 
   const subscription = Linking.addEventListener('url', handleURL);
-  
+
   return () => subscription?.remove();
 }, []);
 ```
@@ -214,7 +214,7 @@ useEffect(() => {
   // Настройка цветовой схемы CloudPayments
   [CloudPaymentsSDK setThemeColor:[UIColor colorWithRed:0.0 green:0.48 blue:1.0 alpha:1.0]];
   [CloudPaymentsSDK setAccentColor:[UIColor colorWithRed:0.2 green:0.78 blue:0.35 alpha:1.0]];
-  
+
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 ```
@@ -239,11 +239,13 @@ if (@available(iOS 13.0, *)) {
 Откройте `ios/YourApp.xcworkspace` и настройте:
 
 **Build Settings:**
+
 - **iOS Deployment Target**: 12.0
 - **Swift Language Version**: Swift 5
 - **Enable Bitcode**: No (для React Native)
 
 **Signing & Capabilities:**
+
 - Настройте Team и Bundle Identifier
 - Добавьте Apple Pay capability
 - Настройте Push Notifications (если нужны)
@@ -284,6 +286,7 @@ Apple Pay работает только на реальных устройств
 :::
 
 Для тестирования Apple Pay:
+
 1. Добавьте тестовую карту в Wallet
 2. Используйте Sandbox окружение
 3. Проверьте настройки региона (Apple Pay доступен не во всех странах)
@@ -334,7 +337,7 @@ const checkApplePaySetup = async () => {
   try {
     const canMakePayments = await PaymentService.canMakeApplePayPayments();
     const canSetupCards = await PaymentService.canSetupApplePayCards();
-    
+
     console.log('Can make payments:', canMakePayments);
     console.log('Can setup cards:', canSetupCards);
   } catch (error) {
@@ -378,4 +381,4 @@ xcrun simctl spawn booted log stream --predicate 'subsystem contains "CloudPayme
 
 ---
 
-**Готово!** 🎉 Ваше iOS приложение готово к приему платежей через CloudPayments! 
+**Готово!** 🎉 Ваше iOS приложение готово к приему платежей через CloudPayments!

@@ -8,7 +8,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+  background: linear-gradient(135deg, #007aff 0%, #0056cc 100%);
 }
 
 @media screen and (max-width: 996px) {
@@ -116,7 +116,9 @@
   padding: 2rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .methodCard:hover {
@@ -157,19 +159,19 @@
 }
 
 .ios {
-  background: #007AFF;
+  background: #007aff;
   color: white;
 }
 
 .android {
-  background: #34C759;
+  background: #34c759;
   color: white;
 }
 
 /* CTA Section */
 .cta {
   padding: 4rem 0;
-  background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+  background: linear-gradient(135deg, #007aff 0%, #0056cc 100%);
   color: white;
   text-align: center;
 }
@@ -204,16 +206,16 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .ctaButtons {
     flex-direction: column;
   }
-  
+
   .ctaButtons .button {
     width: 100%;
     max-width: 300px;
   }
-  
+
   .badges {
     flex-direction: column;
     gap: 0.25rem;

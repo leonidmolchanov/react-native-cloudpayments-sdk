@@ -1,3 +1,42 @@
+export interface ReceiptItem {
+  label: string;
+  price: number;
+  quantity: number;
+  amount: number;
+  vat?: number | null; // может отсутствовать или быть null
+  method: number;
+  object: number;
+}
+
+export interface Amounts {
+  electronic: number;
+  advancePayment: number;
+  credit: number;
+  provision: number;
+}
+
+export interface Receipt {
+  items: ReceiptItem[];
+  taxationSystem: number;
+  email?: string; // опциональные поля с дефолтами
+  phone?: string; // опциональные поля с дефолтами
+  isBso?: boolean; // опционально, default = false
+  amounts?: Amounts; // опционально
+}
+
+export interface IPayer {
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  birth?: string;
+  address?: string;
+  street?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
+  postcode?: string;
+}
+
 /**
  * @fileoverview Интерфейсы данных платежей для CloudPayments SDK
  * @description Содержит типы данных для настройки и выполнения платежей
@@ -91,7 +130,11 @@ export interface IBasePaymentData {
    * Должны быть сериализованы в JSON строку. Максимум 4096 символов.
    * @example '{"orderId": 12345, "source": "mobile_app"}'
    */
-  jsonData?: string;
+  jsonData?: Object;
+
+  receipt?: Receipt;
+
+  payer?: IPayer;
 }
 
 /**
@@ -184,6 +227,8 @@ export interface IPaymentConfigurationData {
    * @default true
    */
   showResultScreen?: boolean;
+  receipt?: Receipt;
+  payer?: IPayer;
 }
 
 /**
