@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.5...v0.1.6) (2025-06-16)
+
+
+### 🐛 Исправления
+
+* js turbomodules spec ([aa76e51](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/aa76e519ebed32067a23e825e194ce1d2446cc97))
+
 ### [0.1.5](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.4...v0.1.5) (2025-06-15)
 
 
