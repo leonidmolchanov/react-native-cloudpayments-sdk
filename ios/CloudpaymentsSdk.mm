@@ -1,4 +1,5 @@
 #import "CloudpaymentsSdk.h"
+#import <CardIO/CardIO.h>
 
 #if __has_include("CloudpaymentsSdk-Swift.h")
 #import "CloudpaymentsSdk-Swift.h"
