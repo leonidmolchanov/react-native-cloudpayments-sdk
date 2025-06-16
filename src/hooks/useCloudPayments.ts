@@ -1,7 +1,7 @@
 /**
  * @fileoverview Главный React хук для работы с CloudPayments SDK
  * @description Объединяет все базовые хуки для удобного использования
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

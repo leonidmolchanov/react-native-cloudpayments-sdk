@@ -1,7 +1,7 @@
 /**
  * @fileoverview Типы для обратной совместимости CloudPayments SDK
  * @description Содержит устаревшие типы данных для поддержки старых версий API
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  * @deprecated Этот файл содержит устаревшие типы. Используйте новые типы с префиксами I/E/T
  */

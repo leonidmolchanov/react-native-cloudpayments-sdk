@@ -15,7 +15,7 @@ import ru.cloudpayments.sdk.api.models.PaymentDataPayer
  * @description Класс для преобразования данных из JavaScript в Android объекты и обратно.
  * Обеспечивает совместимость типов данных между платформами.
  *
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 object PaymentDataConverter {

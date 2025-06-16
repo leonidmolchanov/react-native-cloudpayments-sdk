@@ -1,7 +1,7 @@
 /**
  * @fileoverview CloudPayments SDK Example App
  * @description Демонстрационное приложение для тестирования CloudPayments SDK
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 
@@ -18,7 +18,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
-import type { IPaymentData } from '@lmapp/react-native-cloudpayments';
+import type {
+  IPaymentData,
+  ReceiptItem,
+  Amounts,
+  Receipt,
+  IPayer,
+} from '@lmapp/react-native-cloudpayments';
 import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
@@ -78,42 +84,42 @@ const SECTIONS: ISection[] = [
   },
 ];
 
-const data = {
-  SubscriptionId: 'com.df.twenty.diamonds',
-  CloudPayments: {
-    CustomerReceipt: {
-      Items: [
-        {
-          label: 'Оплата товара 1',
-          price: 0.99,
-          quantity: 1,
-          amount: 0.99,
-          vat: null,
-          method: 4,
-          object: 4,
-        },
-        {
-          label: 'Оплата товара 2',
-          price: 0.99,
-          quantity: 1,
-          amount: 0.99,
-          vat: null,
-          method: 4,
-          object: 4,
-        },
-      ],
-      taxationSystem: 2,
-      isBso: false,
-      amounts: {
-        electronic: 0.99,
-        advancePayment: 0,
-        credit: 0,
-        provision: 0,
-      },
-    },
+// ============================================================================
+// ТИПИЗИРОВАННЫЕ ДАННЫЕ
+// ============================================================================
+
+// Товары в чеке
+const receiptItems: ReceiptItem[] = [
+  {
+    label: 'Премиум подписка',
+    price: 999,
+    quantity: 1,
+    amount: 999,
+    vat: null,
+    method: 4, // Полная предварительная оплата до момента передачи предмета расчета
+    object: 4, // Услуга
   },
+  {
+    label: 'Доставка',
+    price: 1,
+    quantity: 1,
+    amount: 1,
+    vat: null,
+    method: 4,
+    object: 4,
+  },
+];
+
+// Суммы по способам оплаты
+const amounts: Amounts = {
+  electronic: 1000,
+  advancePayment: 0,
+  credit: 0,
+  provision: 0,
 };
-const payer = {
+
+// Информация о плательщике
+const payer: IPayer = {
   firstName: 'Иван',
   lastName: 'Иванов',
   middleName: 'Иванович',
@@ -125,6 +131,29 @@ const payer = {
   phone: '+79991234567',
   postcode: '101000',
 };
+
+// Чек онлайн-кассы
+const receipt: Receipt = {
+  items: receiptItems,
+  taxationSystem: 2, // УСН доходы минус расходы
+  isBso: false,
+  amounts: amounts,
+};
+
+// Дополнительные данные (БЕЗ дублирования чека)
+const jsonData = {
+  SubscriptionId: 'com.df.twenty.diamonds',
+  CustomerInfo: {
+    age: 27,
+    loyaltyLevel: 'premium',
+  },
+  OrderInfo: {
+    source: 'mobile_app',
+    campaign: 'summer_2024',
+  },
+};
+
+// Основные данные платежа
 const SAMPLE_PAYMENT_DATA: IPaymentData = {
   amount: '1000.00',
   currency: 'RUB',
@@ -135,28 +164,8 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   requireEmail: true,
   showResultScreen: true,
   payer: payer,
-  receipt: {
-    amounts: {
-      advancePayment: 0,
-      credit: 0,
-      electronic: 0.99,
-      provision: 0,
-    },
-    isBso: false,
-    items: [
-      {
-        amount: 0.99,
-        label: 'Тестовый товар!',
-        method: 4,
-        object: 4,
-        price: 0.99,
-        quantity: 1,
-        vat: null,
-      },
-    ],
-    taxationSystem: 2,
-  },
-  jsonData: data,
+  receipt: receipt,
+  jsonData: jsonData,
 };
 
 // ============================================================================

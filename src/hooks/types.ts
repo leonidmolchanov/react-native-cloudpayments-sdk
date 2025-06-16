@@ -1,7 +1,7 @@
 /**
  * @fileoverview Типы для главного хука CloudPayments SDK
  * @description Содержит интерфейсы и типы для основного хука useCloudPayments
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

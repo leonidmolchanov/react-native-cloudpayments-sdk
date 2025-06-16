@@ -1,7 +1,7 @@
 /**
  * @fileoverview Интерфейсы событий CloudPayments SDK
  * @description Содержит типы данных для событий платежной формы и пользовательских взаимодействий
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 
