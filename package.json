@@ -46,7 +46,8 @@
     "release:test": "./scripts/test-release.sh",
     "generate-api": "node scripts/generate-api-docs.js",
     "docs:dev": "yarn workspace @lmapp/react-native-cloudpayments-docs start",
-    "docs:build": "yarn workspace @lmapp/react-native-cloudpayments-docs build"
+    "docs:build": "yarn workspace @lmapp/react-native-cloudpayments-docs build",
+    "fix:lint": "yarn run prettier --write ."
   },
   "keywords": [
     "react-native",

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Экспорт всех хуков CloudPayments SDK
  * @description Центральная точка экспорта всех хуков и типов
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

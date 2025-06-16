@@ -1,7 +1,7 @@
 /**
  * @fileoverview Интерфейсы ответов API CloudPayments SDK
  * @description Содержит типы данных для ответов от CloudPayments API и внутренних операций SDK
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

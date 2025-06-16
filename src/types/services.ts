@@ -1,7 +1,7 @@
 /**
  * @fileoverview Интерфейсы сервисов CloudPayments SDK
  * @description Содержит типы для основных сервисов SDK: платежей и работы с картами
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

@@ -73,10 +73,10 @@ jobs:
         run: |
           # Получаем последний тег
           LATEST_TAG=$(git describe --tags --abbrev=0)
-          
+
           # Извлекаем changelog для этой версии
           CHANGELOG_CONTENT=$(sed -n "/## \[${LATEST_TAG#v}\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
-          
+
           # Создаем GitHub релиз
           gh release create "$LATEST_TAG" \
             --title "Release $LATEST_TAG" \
@@ -103,15 +103,15 @@ jobs:
           # Сохраняем оригинальные файлы
           cp package.json package.json.backup
           cp .npmrc .npmrc.backup 2>/dev/null || true
-          
+
           # Настраиваем для GitHub Packages
           cp package-github.json package.json
           echo "@leonidmolchanov:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
-          
+
           # Публикуем в GitHub Packages
           npm publish --access public
-          
+
           # Восстанавливаем оригинальные файлы
           mv package.json.backup package.json
           mv .npmrc.backup .npmrc 2>/dev/null || rm -f .npmrc
@@ -121,4 +121,4 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: |
           # Trigger docs rebuild by updating docs workflow
-          echo "Module published, documentation will be updated automatically" 
+          echo "Module published, documentation will be updated automatically"

@@ -1,7 +1,7 @@
 /**
  * @fileoverview React Native TurboModule спецификация для CloudPayments SDK
  * @description Содержит интерфейс TurboModule для нативного моста между JavaScript и нативным кодом
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 

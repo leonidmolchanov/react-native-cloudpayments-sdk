@@ -16,7 +16,7 @@ import ru.cloudpayments.sdk.models.Transaction
  * @description Класс для управления платежной формой Android SDK.
  * Аналогичен iOS PaymentFormService, но адаптирован под Android архитектуру.
  *
- * @author CloudPayments SDK Team
+ * @author Leonid Molchanov
  * @since 1.0.0
  */
 class PaymentFormService(

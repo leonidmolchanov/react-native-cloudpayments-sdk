@@ -85,3 +85,5 @@ android/generated
 # React Native Nitro Modules
 nitrogen/
 .history
+
+example/src/key.ts
