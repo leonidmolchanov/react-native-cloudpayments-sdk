@@ -25,7 +25,7 @@ import type {
   Receipt,
   IPayer,
 } from '@lmapp/react-native-cloudpayments';
-import { KEY } from './key';
+// import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -38,7 +38,7 @@ import { KEY } from './key';
  *
  * Формат: pk_xxxxxxxxxxxxxxxxxxxxxxxx
  */
-const PUBLIC_ID = KEY; // TODO: Замените на ваш ключ!
+const PUBLIC_ID = 'KEY'; // TODO: Замените на ваш ключ!
 
 // ============================================================================
 // TYPES
