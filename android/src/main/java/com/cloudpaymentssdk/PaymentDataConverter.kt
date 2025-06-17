@@ -2,12 +2,16 @@ package com.cloudpaymentssdk
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableType
 import com.facebook.react.bridge.WritableMap
 import ru.cloudpayments.sdk.configuration.PaymentConfiguration
 import ru.cloudpayments.sdk.configuration.PaymentData
 import ru.cloudpayments.sdk.configuration.CloudpaymentsSDK
 import ru.cloudpayments.sdk.models.Transaction
 import ru.cloudpayments.sdk.api.models.PaymentDataPayer
+import org.json.JSONObject
+import org.json.JSONArray
 
 /**
  * Утилиты для конвертации данных между React Native и CloudPayments Android SDK
@@ -19,6 +23,83 @@ import ru.cloudpayments.sdk.api.models.PaymentDataPayer
  * @since 1.0.0
  */
 object PaymentDataConverter {
+    
+    /**
+     * Конвертация ReadableMap в JSON строку
+     *
+     * @param readableMap Карта данных из React Native
+     * @return JSON строка
+     */
+    private fun readableMapToJson(readableMap: ReadableMap?): String {
+        if (readableMap == null) return "{}"
+        
+        val jsonObject = JSONObject()
+        val iterator = readableMap.keySetIterator()
+        
+        while (iterator.hasNextKey()) {
+            val key = iterator.nextKey()
+            
+            try {
+                when (readableMap.getType(key)) {
+                    ReadableType.Null -> jsonObject.put(key, JSONObject.NULL)
+                    ReadableType.Boolean -> jsonObject.put(key, readableMap.getBoolean(key))
+                    ReadableType.Number -> {
+                        // React Native может передавать как Double так и Int
+                        val doubleValue = readableMap.getDouble(key)
+                        if (doubleValue == doubleValue.toLong().toDouble()) {
+                            jsonObject.put(key, doubleValue.toLong())
+                        } else {
+                            jsonObject.put(key, doubleValue)
+                        }
+                    }
+                    ReadableType.String -> jsonObject.put(key, readableMap.getString(key))
+                    ReadableType.Map -> jsonObject.put(key, JSONObject(readableMapToJson(readableMap.getMap(key))))
+                    ReadableType.Array -> jsonObject.put(key, readableArrayToJson(readableMap.getArray(key)))
+                }
+            } catch (e: Exception) {
+                // Если не удается конвертировать значение, пропускаем его
+                continue
+            }
+        }
+        
+        return jsonObject.toString()
+    }
+    
+    /**
+     * Конвертация ReadableArray в JSONArray
+     *
+     * @param readableArray Массив данных из React Native
+     * @return JSONArray
+     */
+    private fun readableArrayToJson(readableArray: ReadableArray?): JSONArray {
+        val jsonArray = JSONArray()
+        if (readableArray == null) return jsonArray
+        
+        for (i in 0 until readableArray.size()) {
+            try {
+                when (readableArray.getType(i)) {
+                    ReadableType.Null -> jsonArray.put(JSONObject.NULL)
+                    ReadableType.Boolean -> jsonArray.put(readableArray.getBoolean(i))
+                    ReadableType.Number -> {
+                        val doubleValue = readableArray.getDouble(i)
+                        if (doubleValue == doubleValue.toLong().toDouble()) {
+                            jsonArray.put(doubleValue.toLong())
+                        } else {
+                            jsonArray.put(doubleValue)
+                        }
+                    }
+                    ReadableType.String -> jsonArray.put(readableArray.getString(i))
+                    ReadableType.Map -> jsonArray.put(JSONObject(readableMapToJson(readableArray.getMap(i))))
+                    ReadableType.Array -> jsonArray.put(readableArrayToJson(readableArray.getArray(i)))
+                }
+            } catch (e: Exception) {
+                // Если не удается конвертировать значение, пропускаем его
+                continue
+            }
+        }
+        
+        return jsonArray
+    }
     
     /**
      * Создание PaymentDataPayer из React Native данных
@@ -55,13 +136,23 @@ object PaymentDataConverter {
         paymentDataMap: ReadableMap
     ): PaymentConfiguration {
         
-        // Обработка jsonData - если не передано или пустое, используем пустой объект (не null!)
+        // Обработка jsonData - конвертируем ReadableMap в JSON строку
         val jsonDataString = if (paymentDataMap.hasKey(EPaymentConfigKeys.JSON_DATA.rawValue)) {
-            val jsonData = paymentDataMap.getString(EPaymentConfigKeys.JSON_DATA.rawValue)
-            if (!jsonData.isNullOrBlank()) {
-                jsonData
-            } else {
-                "{}"
+            try {
+                val jsonDataMap = paymentDataMap.getMap(EPaymentConfigKeys.JSON_DATA.rawValue)
+                readableMapToJson(jsonDataMap)
+            } catch (e: Exception) {
+                // Если не удается получить как Map, пробуем как String (обратная совместимость)
+                try {
+                    val jsonDataString = paymentDataMap.getString(EPaymentConfigKeys.JSON_DATA.rawValue)
+                    if (!jsonDataString.isNullOrBlank()) {
+                        jsonDataString
+                    } else {
+                        "{}"
+                    }
+                } catch (e2: Exception) {
+                    "{}"
+                }
             }
         } else {
             "{}"
