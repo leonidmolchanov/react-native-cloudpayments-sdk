@@ -23,7 +23,7 @@ import org.json.JSONArray
  * @since 1.0.0
  */
 object PaymentDataConverter {
-    
+
     /**
      * Конвертация ReadableMap в JSON строку
      *
@@ -32,13 +32,13 @@ object PaymentDataConverter {
      */
     private fun readableMapToJson(readableMap: ReadableMap?): String {
         if (readableMap == null) return "{}"
-        
+
         val jsonObject = JSONObject()
         val iterator = readableMap.keySetIterator()
-        
+
         while (iterator.hasNextKey()) {
             val key = iterator.nextKey()
-            
+
             try {
                 when (readableMap.getType(key)) {
                     ReadableType.Null -> jsonObject.put(key, JSONObject.NULL)
@@ -61,10 +61,10 @@ object PaymentDataConverter {
                 continue
             }
         }
-        
+
         return jsonObject.toString()
     }
-    
+
     /**
      * Конвертация ReadableArray в JSONArray
      *
@@ -74,7 +74,7 @@ object PaymentDataConverter {
     private fun readableArrayToJson(readableArray: ReadableArray?): JSONArray {
         val jsonArray = JSONArray()
         if (readableArray == null) return jsonArray
-        
+
         for (i in 0 until readableArray.size()) {
             try {
                 when (readableArray.getType(i)) {
@@ -97,10 +97,10 @@ object PaymentDataConverter {
                 continue
             }
         }
-        
+
         return jsonArray
     }
-    
+
     /**
      * Создание PaymentDataPayer из React Native данных
      *
@@ -109,7 +109,7 @@ object PaymentDataConverter {
      */
     private fun createPaymentDataPayer(payerMap: ReadableMap?): PaymentDataPayer? {
         if (payerMap == null) return null
-        
+
         return PaymentDataPayer(
             firstName = payerMap.getString(EPayerDataKeys.FIRST_NAME.rawValue),
             lastName = payerMap.getString(EPayerDataKeys.LAST_NAME.rawValue),
@@ -123,7 +123,7 @@ object PaymentDataConverter {
             postcode = payerMap.getString(EPayerDataKeys.POSTCODE.rawValue)
         )
     }
-    
+
     /**
      * Создание PaymentConfiguration из React Native данных
      *
@@ -135,29 +135,48 @@ object PaymentDataConverter {
         publicId: String,
         paymentDataMap: ReadableMap
     ): PaymentConfiguration {
-        
+
         // Обработка jsonData - конвертируем ReadableMap в JSON строку
-        val jsonDataString = if (paymentDataMap.hasKey(EPaymentConfigKeys.JSON_DATA.rawValue)) {
-            try {
-                val jsonDataMap = paymentDataMap.getMap(EPaymentConfigKeys.JSON_DATA.rawValue)
-                readableMapToJson(jsonDataMap)
-            } catch (e: Exception) {
-                // Если не удается получить как Map, пробуем как String (обратная совместимость)
-                try {
-                    val jsonDataString = paymentDataMap.getString(EPaymentConfigKeys.JSON_DATA.rawValue)
-                    if (!jsonDataString.isNullOrBlank()) {
-                        jsonDataString
-                    } else {
-                        "{}"
-                    }
-                } catch (e2: Exception) {
-                    "{}"
-                }
-            }
+      val jsonDataString = try {
+        val jsonDataObject = if (paymentDataMap.hasKey(EPaymentConfigKeys.JSON_DATA.rawValue)) {
+          val jsonDataMap = paymentDataMap.getMap(EPaymentConfigKeys.JSON_DATA.rawValue)
+          JSONObject(readableMapToJson(jsonDataMap))
         } else {
-            "{}"
+          JSONObject()
         }
-        
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
+          val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
+          val receiptJson = JSONObject(readableMapToJson(receiptMap))
+
+          val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
+            jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
+          } else {
+            val newCloudPayments = JSONObject()
+            jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, newCloudPayments)
+            newCloudPayments
+          }
+
+          cloudPaymentsJson.put(EPaymentConfigKeys.CUSTOMER_RECEIPT.rawValue, receiptJson)
+        }
+
+        if (paymentDataMap.hasKey("recurrent")) {
+          val recurrentMap = paymentDataMap.getMap("recurrent")
+          val recurrentJson = JSONObject(readableMapToJson(recurrentMap))
+
+          val cloudPaymentsJson = if (jsonDataObject.has("CloudPayments")) {
+            jsonDataObject.getJSONObject("CloudPayments")
+          } else {
+            JSONObject().also { jsonDataObject.put("CloudPayments", it) }
+          }
+
+          cloudPaymentsJson.put("Recurrent", recurrentJson)
+        }
+
+        jsonDataObject.toString()
+      } catch (e: Exception) {
+        "{}"
+      }
+
         // Создаем объект payer если данные переданы
         val payer = if (paymentDataMap.hasKey(EPayerDataKeys.PAYER.rawValue)) {
             val payerData = createPaymentDataPayer(paymentDataMap.getMap(EPayerDataKeys.PAYER.rawValue))
@@ -165,28 +184,28 @@ object PaymentDataConverter {
         } else {
             null
         }
-        
+
         val paymentData = PaymentData(
             amount = paymentDataMap.getString(EPaymentConfigKeys.AMOUNT.rawValue) ?: "0",
             currency = paymentDataMap.getString(EPaymentConfigKeys.CURRENCY.rawValue) ?: ECurrency.RUB,
             description = paymentDataMap.getString(EPaymentConfigKeys.DESCRIPTION.rawValue),
             accountId = paymentDataMap.getString(EPaymentConfigKeys.ACCOUNT_ID.rawValue),
             email = paymentDataMap.getString(EPaymentConfigKeys.EMAIL.rawValue),
-            externalId = paymentDataMap.getString(EPaymentResultValues.EXTERNAL_ID.rawValue),
+//            externalId = paymentDataMap.getString(EPaymentResultValues.EXTERNAL_ID.rawValue),
             payer = payer,
             jsonData = jsonDataString // Всегда передаем валидный JSON
         )
-        
+
         return PaymentConfiguration(
             publicId = publicId,
             paymentData = paymentData,
-            requireEmail = paymentDataMap.hasKey(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue) && 
+            requireEmail = paymentDataMap.hasKey(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue) &&
                           paymentDataMap.getBoolean(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue),
-            useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) && 
+            useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) &&
                                    paymentDataMap.getBoolean(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue)
         )
     }
-    
+
     /**
      * Конвертация Transaction в WritableMap для JavaScript
      *
@@ -196,24 +215,24 @@ object PaymentDataConverter {
     fun transactionToWritableMap(transaction: Transaction): WritableMap {
         return Arguments.createMap().apply {
             putBoolean(EResponseKeys.SUCCESS.rawValue, transaction.status == CloudpaymentsSDK.TransactionStatus.Succeeded)
-            
-            transaction.transactionId?.let { 
-                putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble()) 
+
+            transaction.transactionId?.let {
+                putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble())
             }
-            
+
             transaction.status?.let { status ->
                 putString(EResponseKeys.STATUS.rawValue, when (status) {
                     CloudpaymentsSDK.TransactionStatus.Succeeded -> EPaymentResultValues.SUCCEEDED.rawValue
                     CloudpaymentsSDK.TransactionStatus.Failed -> EDefaultMessages.PAYMENT_FAILED.rawValue
                 })
             }
-            
-            transaction.reasonCode?.let { 
-                putInt(EPaymentResultValues.REASON_CODE.rawValue, it) 
+
+            transaction.reasonCode?.let {
+                putInt(EPaymentResultValues.REASON_CODE.rawValue, it)
             }
         }
     }
-    
+
     /**
      * Создание ответа об ошибке для JavaScript
      *
@@ -234,7 +253,7 @@ object PaymentDataConverter {
             details?.let { putString(EPaymentResultValues.DETAILS.rawValue, it) }
         }
     }
-    
+
     /**
      * Создание успешного ответа для JavaScript
      *
@@ -252,7 +271,7 @@ object PaymentDataConverter {
             message?.let { putString(EResponseKeys.MESSAGE.rawValue, it) }
         }
     }
-    
+
     /**
      * Получение способа оплаты из строки
      *
@@ -267,7 +286,7 @@ object PaymentDataConverter {
             else -> CloudpaymentsSDK.SDKRunMode.SelectPaymentMethod
         }
     }
-    
+
     /**
      * Конвертация кода ошибки CloudPayments в строку
      *
@@ -284,7 +303,7 @@ object PaymentDataConverter {
             else -> EDefaultMessages.UNKNOWN_ERROR.rawValue
         }
     }
-    
+
     /**
      * Получение человекочитаемого сообщения об ошибке
      *
@@ -301,7 +320,7 @@ object PaymentDataConverter {
             else -> EDefaultMessages.UNKNOWN_ERROR.rawValue
         }
     }
-    
+
     /**
      * Создает результат для успешного платежа
      */
@@ -314,4 +333,4 @@ object PaymentDataConverter {
         result.putString(EPaymentConfigKeys.CURRENCY.rawValue, ECurrency.RUB)
         return result
     }
-} 
+}

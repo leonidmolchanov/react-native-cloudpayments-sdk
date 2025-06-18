@@ -1,3 +1,15 @@
+export enum RECURENT_PERIOD {
+  DAY = 'Day',
+  WEEK = 'Week',
+  MONTH = 'Month',
+}
+
+export type Recurrent = {
+  interval: RECURENT_PERIOD;
+  period: number;
+  customerReceipt: Receipt; //чек для регулярных платежей
+};
+
 /**
  * Элемент чека (товар/услуга)
  * @description Представляет одну позицию в чеке онлайн-кассы согласно 54-ФЗ.
@@ -581,6 +593,7 @@ export interface IPaymentConfigurationData {
   showResultScreen?: boolean;
   receipt?: Receipt;
   payer?: IPayer;
+  recurrent?: Recurrent;
 }
 
 /**
