@@ -159,17 +159,17 @@ object PaymentDataConverter {
           cloudPaymentsJson.put(EPaymentConfigKeys.CUSTOMER_RECEIPT.rawValue, receiptJson)
         }
 
-        if (paymentDataMap.hasKey("recurrent")) {
-          val recurrentMap = paymentDataMap.getMap("recurrent")
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECURRENT.rawValue)) {
+          val recurrentMap = paymentDataMap.getMap(EPaymentConfigKeys.RECURRENT.rawValue)
           val recurrentJson = JSONObject(readableMapToJson(recurrentMap))
 
-          val cloudPaymentsJson = if (jsonDataObject.has("CloudPayments")) {
-            jsonDataObject.getJSONObject("CloudPayments")
+          val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
+            jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
           } else {
-            JSONObject().also { jsonDataObject.put("CloudPayments", it) }
+            JSONObject().also { jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, it) }
           }
 
-          cloudPaymentsJson.put("Recurrent", recurrentJson)
+          cloudPaymentsJson.put(EPaymentConfigKeys.UPPER_RECURRENT.rawValue, recurrentJson)
         }
 
         jsonDataObject.toString()

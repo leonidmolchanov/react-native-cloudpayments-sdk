@@ -51,7 +51,10 @@ enum class EPaymentConfigKeys(val rawValue: String) {
     SHOW_RESULT_SCREEN("showResultScreen"),
     RECEIPT("receipt"),
     CLOUDPAYMENTS("CloudPayments"),
-    CUSTOMER_RECEIPT("CustomerReceipt")
+    CUSTOMER_RECEIPT("CustomerReceipt"),
+    RECURRENT("recurrent"),
+    UPPER_RECURRENT("Recurrent"),
+
 }
 
 // MARK: - Payment Methods
