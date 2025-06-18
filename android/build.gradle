@@ -77,7 +77,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
   // CloudPayments SDK
-  implementation 'ru.cloudpayments.gitpub.integrations.sdk:cloudpayments-android:1.7.1'
+  implementation 'ru.cloudpayments.gitpub.integrations.sdk:cloudpayments-android:1.6.0'
 
   // Google Pay (опционально)
   implementation 'com.google.android.gms:play-services-wallet:18.1.2'

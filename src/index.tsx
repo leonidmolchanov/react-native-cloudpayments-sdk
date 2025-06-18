@@ -17,15 +17,11 @@ const CloudpaymentsSdk = NativeModules.CloudpaymentsSdk
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return CloudpaymentsSdk.multiply(a, b);
-}
-
 // Экспорт сервисов
 export { PaymentService, CardService } from './services';
 
 // Экспорт типов
-export type * from './types';
+export * from './types';
 
 // Экспорт событий
 export { eventEmitter } from './events';

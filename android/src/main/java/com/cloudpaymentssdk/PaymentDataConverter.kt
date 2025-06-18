@@ -2,12 +2,16 @@ package com.cloudpaymentssdk
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableType
 import com.facebook.react.bridge.WritableMap
 import ru.cloudpayments.sdk.configuration.PaymentConfiguration
 import ru.cloudpayments.sdk.configuration.PaymentData
 import ru.cloudpayments.sdk.configuration.CloudpaymentsSDK
 import ru.cloudpayments.sdk.models.Transaction
 import ru.cloudpayments.sdk.api.models.PaymentDataPayer
+import org.json.JSONObject
+import org.json.JSONArray
 
 /**
  * Утилиты для конвертации данных между React Native и CloudPayments Android SDK
@@ -19,7 +23,84 @@ import ru.cloudpayments.sdk.api.models.PaymentDataPayer
  * @since 1.0.0
  */
 object PaymentDataConverter {
-    
+
+    /**
+     * Конвертация ReadableMap в JSON строку
+     *
+     * @param readableMap Карта данных из React Native
+     * @return JSON строка
+     */
+    private fun readableMapToJson(readableMap: ReadableMap?): String {
+        if (readableMap == null) return "{}"
+
+        val jsonObject = JSONObject()
+        val iterator = readableMap.keySetIterator()
+
+        while (iterator.hasNextKey()) {
+            val key = iterator.nextKey()
+
+            try {
+                when (readableMap.getType(key)) {
+                    ReadableType.Null -> jsonObject.put(key, JSONObject.NULL)
+                    ReadableType.Boolean -> jsonObject.put(key, readableMap.getBoolean(key))
+                    ReadableType.Number -> {
+                        // React Native может передавать как Double так и Int
+                        val doubleValue = readableMap.getDouble(key)
+                        if (doubleValue == doubleValue.toLong().toDouble()) {
+                            jsonObject.put(key, doubleValue.toLong())
+                        } else {
+                            jsonObject.put(key, doubleValue)
+                        }
+                    }
+                    ReadableType.String -> jsonObject.put(key, readableMap.getString(key))
+                    ReadableType.Map -> jsonObject.put(key, JSONObject(readableMapToJson(readableMap.getMap(key))))
+                    ReadableType.Array -> jsonObject.put(key, readableArrayToJson(readableMap.getArray(key)))
+                }
+            } catch (e: Exception) {
+                // Если не удается конвертировать значение, пропускаем его
+                continue
+            }
+        }
+
+        return jsonObject.toString()
+    }
+
+    /**
+     * Конвертация ReadableArray в JSONArray
+     *
+     * @param readableArray Массив данных из React Native
+     * @return JSONArray
+     */
+    private fun readableArrayToJson(readableArray: ReadableArray?): JSONArray {
+        val jsonArray = JSONArray()
+        if (readableArray == null) return jsonArray
+
+        for (i in 0 until readableArray.size()) {
+            try {
+                when (readableArray.getType(i)) {
+                    ReadableType.Null -> jsonArray.put(JSONObject.NULL)
+                    ReadableType.Boolean -> jsonArray.put(readableArray.getBoolean(i))
+                    ReadableType.Number -> {
+                        val doubleValue = readableArray.getDouble(i)
+                        if (doubleValue == doubleValue.toLong().toDouble()) {
+                            jsonArray.put(doubleValue.toLong())
+                        } else {
+                            jsonArray.put(doubleValue)
+                        }
+                    }
+                    ReadableType.String -> jsonArray.put(readableArray.getString(i))
+                    ReadableType.Map -> jsonArray.put(JSONObject(readableMapToJson(readableArray.getMap(i))))
+                    ReadableType.Array -> jsonArray.put(readableArrayToJson(readableArray.getArray(i)))
+                }
+            } catch (e: Exception) {
+                // Если не удается конвертировать значение, пропускаем его
+                continue
+            }
+        }
+
+        return jsonArray
+    }
+
     /**
      * Создание PaymentDataPayer из React Native данных
      *
@@ -28,7 +109,7 @@ object PaymentDataConverter {
      */
     private fun createPaymentDataPayer(payerMap: ReadableMap?): PaymentDataPayer? {
         if (payerMap == null) return null
-        
+
         return PaymentDataPayer(
             firstName = payerMap.getString(EPayerDataKeys.FIRST_NAME.rawValue),
             lastName = payerMap.getString(EPayerDataKeys.LAST_NAME.rawValue),
@@ -42,7 +123,7 @@ object PaymentDataConverter {
             postcode = payerMap.getString(EPayerDataKeys.POSTCODE.rawValue)
         )
     }
-    
+
     /**
      * Создание PaymentConfiguration из React Native данных
      *
@@ -54,19 +135,48 @@ object PaymentDataConverter {
         publicId: String,
         paymentDataMap: ReadableMap
     ): PaymentConfiguration {
-        
-        // Обработка jsonData - если не передано или пустое, используем пустой объект (не null!)
-        val jsonDataString = if (paymentDataMap.hasKey(EPaymentConfigKeys.JSON_DATA.rawValue)) {
-            val jsonData = paymentDataMap.getString(EPaymentConfigKeys.JSON_DATA.rawValue)
-            if (!jsonData.isNullOrBlank()) {
-                jsonData
-            } else {
-                "{}"
-            }
+
+        // Обработка jsonData - конвертируем ReadableMap в JSON строку
+      val jsonDataString = try {
+        val jsonDataObject = if (paymentDataMap.hasKey(EPaymentConfigKeys.JSON_DATA.rawValue)) {
+          val jsonDataMap = paymentDataMap.getMap(EPaymentConfigKeys.JSON_DATA.rawValue)
+          JSONObject(readableMapToJson(jsonDataMap))
         } else {
-            "{}"
+          JSONObject()
         }
-        
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
+          val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
+          val receiptJson = JSONObject(readableMapToJson(receiptMap))
+
+          val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
+            jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
+          } else {
+            val newCloudPayments = JSONObject()
+            jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, newCloudPayments)
+            newCloudPayments
+          }
+
+          cloudPaymentsJson.put(EPaymentConfigKeys.CUSTOMER_RECEIPT.rawValue, receiptJson)
+        }
+
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECURRENT.rawValue)) {
+          val recurrentMap = paymentDataMap.getMap(EPaymentConfigKeys.RECURRENT.rawValue)
+          val recurrentJson = JSONObject(readableMapToJson(recurrentMap))
+
+          val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
+            jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
+          } else {
+            JSONObject().also { jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, it) }
+          }
+
+          cloudPaymentsJson.put(EPaymentConfigKeys.UPPER_RECURRENT.rawValue, recurrentJson)
+        }
+
+        jsonDataObject.toString()
+      } catch (e: Exception) {
+        "{}"
+      }
+
         // Создаем объект payer если данные переданы
         val payer = if (paymentDataMap.hasKey(EPayerDataKeys.PAYER.rawValue)) {
             val payerData = createPaymentDataPayer(paymentDataMap.getMap(EPayerDataKeys.PAYER.rawValue))
@@ -74,28 +184,28 @@ object PaymentDataConverter {
         } else {
             null
         }
-        
+
         val paymentData = PaymentData(
             amount = paymentDataMap.getString(EPaymentConfigKeys.AMOUNT.rawValue) ?: "0",
             currency = paymentDataMap.getString(EPaymentConfigKeys.CURRENCY.rawValue) ?: ECurrency.RUB,
             description = paymentDataMap.getString(EPaymentConfigKeys.DESCRIPTION.rawValue),
             accountId = paymentDataMap.getString(EPaymentConfigKeys.ACCOUNT_ID.rawValue),
             email = paymentDataMap.getString(EPaymentConfigKeys.EMAIL.rawValue),
-            externalId = paymentDataMap.getString(EPaymentResultValues.EXTERNAL_ID.rawValue),
+//            externalId = paymentDataMap.getString(EPaymentResultValues.EXTERNAL_ID.rawValue),
             payer = payer,
             jsonData = jsonDataString // Всегда передаем валидный JSON
         )
-        
+
         return PaymentConfiguration(
             publicId = publicId,
             paymentData = paymentData,
-            requireEmail = paymentDataMap.hasKey(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue) && 
+            requireEmail = paymentDataMap.hasKey(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue) &&
                           paymentDataMap.getBoolean(EPaymentConfigKeys.REQUIRE_EMAIL.rawValue),
-            useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) && 
+            useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) &&
                                    paymentDataMap.getBoolean(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue)
         )
     }
-    
+
     /**
      * Конвертация Transaction в WritableMap для JavaScript
      *
@@ -105,24 +215,24 @@ object PaymentDataConverter {
     fun transactionToWritableMap(transaction: Transaction): WritableMap {
         return Arguments.createMap().apply {
             putBoolean(EResponseKeys.SUCCESS.rawValue, transaction.status == CloudpaymentsSDK.TransactionStatus.Succeeded)
-            
-            transaction.transactionId?.let { 
-                putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble()) 
+
+            transaction.transactionId?.let {
+                putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble())
             }
-            
+
             transaction.status?.let { status ->
                 putString(EResponseKeys.STATUS.rawValue, when (status) {
                     CloudpaymentsSDK.TransactionStatus.Succeeded -> EPaymentResultValues.SUCCEEDED.rawValue
                     CloudpaymentsSDK.TransactionStatus.Failed -> EDefaultMessages.PAYMENT_FAILED.rawValue
                 })
             }
-            
-            transaction.reasonCode?.let { 
-                putInt(EPaymentResultValues.REASON_CODE.rawValue, it) 
+
+            transaction.reasonCode?.let {
+                putInt(EPaymentResultValues.REASON_CODE.rawValue, it)
             }
         }
     }
-    
+
     /**
      * Создание ответа об ошибке для JavaScript
      *
@@ -143,7 +253,7 @@ object PaymentDataConverter {
             details?.let { putString(EPaymentResultValues.DETAILS.rawValue, it) }
         }
     }
-    
+
     /**
      * Создание успешного ответа для JavaScript
      *
@@ -161,7 +271,7 @@ object PaymentDataConverter {
             message?.let { putString(EResponseKeys.MESSAGE.rawValue, it) }
         }
     }
-    
+
     /**
      * Получение способа оплаты из строки
      *
@@ -176,7 +286,7 @@ object PaymentDataConverter {
             else -> CloudpaymentsSDK.SDKRunMode.SelectPaymentMethod
         }
     }
-    
+
     /**
      * Конвертация кода ошибки CloudPayments в строку
      *
@@ -193,7 +303,7 @@ object PaymentDataConverter {
             else -> EDefaultMessages.UNKNOWN_ERROR.rawValue
         }
     }
-    
+
     /**
      * Получение человекочитаемого сообщения об ошибке
      *
@@ -210,7 +320,7 @@ object PaymentDataConverter {
             else -> EDefaultMessages.UNKNOWN_ERROR.rawValue
         }
     }
-    
+
     /**
      * Создает результат для успешного платежа
      */
@@ -223,4 +333,4 @@ object PaymentDataConverter {
         result.putString(EPaymentConfigKeys.CURRENCY.rawValue, ECurrency.RUB)
         return result
     }
-} 
+}

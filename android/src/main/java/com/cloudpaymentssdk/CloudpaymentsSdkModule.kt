@@ -23,7 +23,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
   companion object {
     const val NAME = EModuleNames.CLOUDPAYMENTS_SDK
-    
+
     /**
      * Helper функция для получения статуса транзакции с поддержкой новых API
      */
@@ -44,6 +44,136 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   override fun getName(): String {
     return NAME
   }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun getPublicKey(promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Получение публичного ключа для шифрования
+      val result = ""
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun isCardNumberValid(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Валидация номера банковской карты
+      promise.resolve(false)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun isExpDateValid(expDate: String, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Валидация срока действия карты
+      promise.resolve(false)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun isValidCvv(cvv: String, isCvvRequired: Boolean, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Валидация CVV кода карты
+      promise.resolve(false)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  @ReactMethod
+  override fun makeCardCryptogramPacket(
+    cardNumber: String,
+    expDate: String,
+    cvv: String,
+    merchantPublicID: String,
+    publicKey: String,
+    keyVersion: Double,
+    promise: Promise
+  ) {
+    try {
+      // TODO: NOT IMPLEMENTED - Реализация расчёта криптограммы
+      val result = ""
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun createIntent(paymentData: ReadableMap, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Создание платежного намерения
+      promise.reject("NOT_IMPLEMENTED", "createIntent method not implemented yet")
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun createIntentApiPay(
+    paymentData: ReadableMap,
+    cardCryptogram: String,
+    intentId: String,
+    promise: Promise
+  ) {
+    try {
+      // TODO: NOT IMPLEMENTED - Оплата через Intent с криптограммой
+      promise.reject("NOT_IMPLEMENTED", "createIntentApiPay method not implemented yet")
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun getIntentWaitStatus(
+    paymentData: ReadableMap,
+    type: String,
+    promise: Promise
+  ) {
+    try {
+      // TODO: NOT IMPLEMENTED - Ожидание статуса Intent для альтернативных способов оплаты
+      promise.reject("NOT_IMPLEMENTED", "getIntentWaitStatus method not implemented yet")
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun cardTypeFromCardNumber(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Определение типа карты по номеру
+      val result = "unknown"
+      promise.resolve(result)
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
+  //TODO: NOT IMPLEMENTED
+  @ReactMethod
+  override fun getBankInfo(cardNumber: String, promise: Promise) {
+    try {
+      // TODO: NOT IMPLEMENTED - Получение информации о банке-эмитенте
+      promise.reject("NOT_IMPLEMENTED", "getBankInfo method not implemented yet")
+    } catch (e: Exception) {
+      promise.reject("ERROR", e.message)
+    }
+  }
+
 
   @ReactMethod
   override fun initialize(publicId: String, promise: Promise) {
@@ -72,17 +202,17 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
       // Сохраняем Promise для обработки результата
       pendingPromise = promise
-      
+
       // Создаем конфигурацию платежа
       val configuration = PaymentDataConverter.createPaymentConfiguration(currentPublicId, paymentData)
-      
+
       // Отправляем события
       eventEmitter.sendFormWillDisplay()
       eventEmitter.sendFormDidDisplay()
-      
+
       // Запускаем платежную форму напрямую
       CloudpaymentsSDK.getInstance().start(configuration, activity, EModuleNames.PAYMENT_REQUEST_CODE)
-      
+
     } catch (e: Exception) {
       promise.reject(EAndroidSpecific.PAYMENT_FORM_ERROR, "Failed to present payment form: ${e.message}", e)
     }
@@ -109,7 +239,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private fun handlePaymentResult(resultCode: Int, data: Intent?) {
     // Отправляем события
     eventEmitter.sendFormWillHide()
-    
+
     when (resultCode) {
       Activity.RESULT_OK -> {
         // Проверяем статус транзакции из Intent
@@ -119,7 +249,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           @Suppress("DEPRECATION")
           data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
         }
-        
+
         when (transactionStatus) {
           CloudpaymentsSDK.TransactionStatus.Succeeded -> {
             handleSuccessfulPayment(data)
@@ -132,18 +262,18 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           }
         }
       }
-      
+
       Activity.RESULT_CANCELED -> {
         handleCancelledPayment()
       }
-      
+
       else -> {
         handleCancelledPayment()
       }
     }
-    
+
     eventEmitter.sendFormDidHide()
-    
+
     // Очищаем Promise
     pendingPromise = null
   }
@@ -157,20 +287,20 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
       val transactionStatus = data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
       val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
-      
+
       // Отправляем событие успешной транзакции
       eventEmitter.sendTransactionSuccess(
         transactionId = transactionId,
         message = EDefaultMessages.PAYMENT_COMPLETED_SUCCESSFULLY.rawValue
       )
-      
+
       // Создаем результат для Promise - используем тот же формат что в iOS
       val result = Arguments.createMap().apply {
         putBoolean(EResponseKeys.SUCCESS.rawValue, true)
         putDouble(EResponseKeys.TRANSACTION_ID.rawValue, transactionId.toDouble())
         putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_COMPLETED_SUCCESSFULLY.rawValue)
       }
-      
+
       pendingPromise?.resolve(result)
     } catch (e: Exception) {
       pendingPromise?.reject(EAndroidSpecific.SUCCESS_PROCESSING_ERROR, e.message, e)
@@ -186,17 +316,17 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
       val transactionStatus = data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
       val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
-      
+
       // Получаем код ошибки и сообщение на основе reasonCode
       val errorCode = PaymentDataConverter.getErrorCodeFromReasonCode(reasonCode)
       val errorMessage = PaymentDataConverter.getErrorMessage(reasonCode)
-      
+
       // Отправляем событие ошибки транзакции
       eventEmitter.sendTransactionError(
         message = errorMessage,
         errorCode = errorCode
       )
-      
+
       // Создаем результат с ошибкой для Promise - используем тот же формат что в iOS
       val result = Arguments.createMap().apply {
         putBoolean(EResponseKeys.SUCCESS.rawValue, false)
@@ -206,7 +336,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           putDouble(EResponseKeys.TRANSACTION_ID.rawValue, transactionId.toDouble())
         }
       }
-      
+
       pendingPromise?.resolve(result)
     } catch (e: Exception) {
       pendingPromise?.reject(EAndroidSpecific.FAILED_PROCESSING_ERROR, e.message, e)
@@ -219,7 +349,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private fun handleCancelledPayment() {
     // Отправляем событие ошибки транзакции (отмена)
     eventEmitter.sendTransactionError(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
-    
+
     // Создаем результат отмены для Promise - используем тот же формат что в iOS
     val result = Arguments.createMap().apply {
       putBoolean(EResponseKeys.SUCCESS.rawValue, false)
@@ -227,7 +357,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
       putString(EResponseKeys.ERROR_CODE.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
     }
-    
+
     pendingPromise?.resolve(result)
   }
 

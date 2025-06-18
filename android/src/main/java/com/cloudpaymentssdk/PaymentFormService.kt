@@ -8,7 +8,11 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import ru.cloudpayments.sdk.configuration.CloudpaymentsSDK
 import ru.cloudpayments.sdk.configuration.PaymentConfiguration
+import ru.cloudpayments.sdk.configuration.PaymentData
 import ru.cloudpayments.sdk.models.Transaction
+import ru.cloudpayments.sdk.api.models.PaymentDataReceiptItem
+import ru.cloudpayments.sdk.api.models.PaymentDataReceiptAmounts
+import ru.cloudpayments.sdk.api.models.PaymentDataReceipt
 
 /**
  * Сервис для работы с платежной формой CloudPayments
@@ -23,11 +27,11 @@ class PaymentFormService(
     private val reactContext: ReactApplicationContext,
     private val eventEmitter: CloudPaymentsEventEmitter
 ) {
-    
+
     private var currentPublicId: String? = null
     private var paymentLauncher: ActivityResultLauncher<PaymentConfiguration>? = null
     private var currentPromise: PromiseWrapper? = null
-    
+
     /**
      * Установка публичного ID мерчанта
      *
@@ -36,7 +40,7 @@ class PaymentFormService(
     fun setPublicId(publicId: String) {
         currentPublicId = publicId
     }
-    
+
     /**
      * Показ платежной формы CloudPayments
      *
@@ -63,30 +67,31 @@ class PaymentFormService(
                 promise.reject(ECloudPaymentsError.SERVICE_UNINITIALIZED.rawValue, EDefaultMessages.PAYMENT_SERVICE_NOT_INITIALIZED.rawValue, null)
                 return
             }
-            
+
             val activity = reactContext.currentActivity
             if (activity !is AppCompatActivity) {
                 promise.reject(ECloudPaymentsError.NO_VIEW_CONTROLLER.rawValue, EDefaultMessages.NO_VIEW_CONTROLLER_AVAILABLE.rawValue, null)
                 return
             }
-            
+
             // Сохраняем Promise для обработки результата
             currentPromise = PromiseWrapper(promise)
-            
+
             // Создаем конфигурацию платежа
             val configuration = PaymentDataConverter.createPaymentConfiguration(publicId, paymentData)
-            
-            // Отправляем событие "willDisplay"
+
+
+          // Отправляем событие "willDisplay"
             eventEmitter.sendFormWillDisplay()
-            
+
             // Запускаем платежную форму
             launchPaymentForm(activity, configuration)
-            
+
         } catch (e: Exception) {
             promise.reject(ECloudPaymentsError.CONFIGURATION_ERROR.rawValue, EDefaultMessages.INVALID_PAYMENT_CONFIGURATION.rawValue + ": ${e.message}", e)
         }
     }
-    
+
     /**
      * Запуск платежной формы через Activity Result API
      */
@@ -98,26 +103,26 @@ class PaymentFormService(
                     handlePaymentResult(transaction)
                 }
             }
-            
+
             // Отправляем событие "didDisplay"
             eventEmitter.sendFormDidDisplay()
-            
+
             // Запускаем платежную форму
             paymentLauncher?.launch(configuration)
-            
+
         } catch (e: Exception) {
             // Отправляем событие "didHide" при ошибке
             eventEmitter.sendFormDidHide()
-            
+
             currentPromise?.promise?.reject(
-                EAndroidSpecific.PAYMENT_FORM_ERROR, 
-                EDefaultMessages.INVALID_PAYMENT_CONFIGURATION.rawValue + ": ${e.message}", 
+                EAndroidSpecific.PAYMENT_FORM_ERROR,
+                EDefaultMessages.INVALID_PAYMENT_CONFIGURATION.rawValue + ": ${e.message}",
                 e
             )
             currentPromise = null
         }
     }
-    
+
     /**
      * Обработка результата платежа
      *
@@ -126,45 +131,45 @@ class PaymentFormService(
     private fun handlePaymentResult(transaction: Transaction) {
         // Отправляем событие "willHide"
         eventEmitter.sendFormWillHide()
-        
+
         when (transaction.status) {
             CloudpaymentsSDK.TransactionStatus.Succeeded -> {
                 handleSuccessfulPayment(transaction)
             }
-            
+
             CloudpaymentsSDK.TransactionStatus.Failed -> {
                 handleFailedPayment(transaction)
             }
-            
+
             else -> {
                 handleCancelledPayment()
             }
         }
-        
+
         // Отправляем событие "didHide"
         eventEmitter.sendFormDidHide()
-        
+
         // Очищаем текущий Promise
         currentPromise = null
     }
-    
+
     /**
      * Обработка успешного платежа
      */
     private fun handleSuccessfulPayment(transaction: Transaction) {
         val transactionId = transaction.transactionId ?: 0L
-        
+
         // Отправляем событие успешной транзакции
         eventEmitter.sendTransactionSuccess(
             transactionId = transactionId,
             message = EDefaultMessages.PAYMENT_COMPLETED_SUCCESSFULLY.rawValue
         )
-        
+
         // Возвращаем результат в Promise
         val result = PaymentDataConverter.transactionToWritableMap(transaction)
         currentPromise?.promise?.resolve(result)
     }
-    
+
     /**
      * Обработка неудачного платежа
      */
@@ -172,13 +177,13 @@ class PaymentFormService(
         val reasonCode = transaction.reasonCode
         val errorCode = PaymentDataConverter.getErrorCodeFromReasonCode(reasonCode)
         val errorMessage = PaymentDataConverter.getErrorMessage(reasonCode)
-        
+
         // Отправляем событие ошибки транзакции
         eventEmitter.sendTransactionError(
             message = errorMessage,
             errorCode = errorCode
         )
-        
+
         // Возвращаем ошибку в Promise
         currentPromise?.promise?.reject(
             errorCode,
@@ -186,7 +191,7 @@ class PaymentFormService(
             null
         )
     }
-    
+
     /**
      * Обработка отмененного платежа
      */
@@ -198,7 +203,7 @@ class PaymentFormService(
             null
         )
     }
-    
+
     /**
      * Очистка ресурсов
      */
@@ -213,4 +218,4 @@ class PaymentFormService(
  */
 private class PromiseWrapper(
     val promise: com.facebook.react.bridge.Promise
-) 
+)
