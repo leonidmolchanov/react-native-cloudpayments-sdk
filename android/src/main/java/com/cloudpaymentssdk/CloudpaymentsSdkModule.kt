@@ -295,7 +295,29 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       }
 
       Activity.RESULT_CANCELED -> {
-        handleCancelledPayment()
+        // УЛУЧШЕНО: Проверяем, есть ли данные об ошибке в Intent
+        val transactionStatus = getTransactionStatus(data)
+        val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+        val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
+        
+        when {
+          // Если статус явно указывает на неудачу - это ошибка
+          transactionStatus == CloudpaymentsSDK.TransactionStatus.Failed -> {
+            handleFailedPayment(data)
+          }
+          // Если есть код ошибки, но нет ID транзакции - это ошибка
+          reasonCode > 0 && transactionId <= 0L -> {
+            handleFailedPayment(data)
+          }
+          // Если есть ID транзакции - возможно успех (редкий случай)
+          transactionId > 0L -> {
+            handleSuccessfulPayment(data)
+          }
+          // Во всех остальных случаях - отмена пользователем
+          else -> {
+            handleCancelledPayment()
+          }
+        }
       }
 
       else -> {

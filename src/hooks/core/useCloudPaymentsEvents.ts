@@ -204,6 +204,13 @@ export const useCloudPaymentsEvents = (
           transactionProcessedRef.current = false;
           break;
 
+        case 'cancelled':
+          // НОВОЕ: Обработка специального события отмены платежа
+          transactionProcessedRef.current = true;
+          setStatus('cancelled');
+          onCancel?.();
+          break;
+
         case 'transaction':
           // Отмечаем что транзакция была обработана
           transactionProcessedRef.current = true;
