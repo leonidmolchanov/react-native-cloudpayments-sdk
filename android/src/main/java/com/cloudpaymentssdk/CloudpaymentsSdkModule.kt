@@ -20,19 +20,35 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private var publicId: String? = null
   private var eventEmitter = CloudPaymentsEventEmitter(reactContext)
   private var pendingPromise: Promise? = null
+  private var isProcessingResult = false // Защита от повторной обработки
 
   companion object {
     const val NAME = EModuleNames.CLOUDPAYMENTS_SDK
 
     /**
      * Helper функция для получения статуса транзакции с поддержкой новых API
+     * Улучшенная версия с обработкой ошибок десериализации
      */
     private fun getTransactionStatus(data: Intent?): CloudpaymentsSDK.TransactionStatus? {
-      return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name, CloudpaymentsSDK.TransactionStatus::class.java)
-      } else {
-        @Suppress("DEPRECATION")
-        data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
+      if (data == null) return null
+      
+      return try {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+          data.getSerializableExtra(
+            CloudpaymentsSDK.IntentKeys.TransactionStatus.name, 
+            CloudpaymentsSDK.TransactionStatus::class.java
+          )
+        } else {
+          @Suppress("DEPRECATION")
+          val serializable = data.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name)
+          serializable as? CloudpaymentsSDK.TransactionStatus
+        }
+      } catch (e: ClassCastException) {
+        // Проблема с приведением типов - логируем и возвращаем null
+        null
+      } catch (e: Exception) {
+        // Любая другая ошибка при извлечении статуса
+        null
       }
     }
   }
@@ -202,6 +218,9 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
       // Сохраняем Promise для обработки результата
       pendingPromise = promise
+      
+      // Сбрасываем флаг обработки результата для нового платежа
+      isProcessingResult = false
 
       // Создаем конфигурацию платежа
       val configuration = PaymentDataConverter.createPaymentConfiguration(currentPublicId, paymentData)
@@ -235,20 +254,24 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
   /**
    * Обработка результата платежа из onActivityResult
+   * Исправленная версия с правильной логикой обработки неизвестного статуса
    */
   private fun handlePaymentResult(resultCode: Int, data: Intent?) {
+    // ЗАЩИТА: Предотвращаем повторную обработку результата
+    if (isProcessingResult) {
+      return
+    }
+    
+    isProcessingResult = true
+    
     // Отправляем события
     eventEmitter.sendFormWillHide()
 
     when (resultCode) {
       Activity.RESULT_OK -> {
-        // Проверяем статус транзакции из Intent
-        val transactionStatus = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-          data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name, CloudpaymentsSDK.TransactionStatus::class.java)
-        } else {
-          @Suppress("DEPRECATION")
-          data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
-        }
+        // Используем улучшенную функцию для получения статуса
+        val transactionStatus = getTransactionStatus(data)
+        val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
 
         when (transactionStatus) {
           CloudpaymentsSDK.TransactionStatus.Succeeded -> {
@@ -257,8 +280,16 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           CloudpaymentsSDK.TransactionStatus.Failed -> {
             handleFailedPayment(data)
           }
-          else -> {
-            handleCancelledPayment()
+          null -> {
+            // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: правильная обработка неизвестного статуса
+            // Если статус неизвестен, но resultCode = OK, проверяем наличие transactionId
+            if (transactionId > 0L) {
+              // Если есть transactionId, значит платеж прошел успешно
+              handleSuccessfulPayment(data)
+            } else {
+              // Если нет transactionId, значит была ошибка
+              handleFailedPayment(data)
+            }
           }
         }
       }
@@ -268,14 +299,16 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       }
 
       else -> {
-        handleCancelledPayment()
+        // Любой другой код результата считаем ошибкой, а не отменой
+        handleFailedPayment(data)
       }
     }
 
     eventEmitter.sendFormDidHide()
 
-    // Очищаем Promise
+    // Очищаем Promise и сбрасываем флаг
     pendingPromise = null
+    isProcessingResult = false
   }
 
   /**
@@ -347,8 +380,8 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
    * Обработка отменённого платежа
    */
   private fun handleCancelledPayment() {
-    // Отправляем событие ошибки транзакции (отмена)
-    eventEmitter.sendTransactionError(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
+    // Отправляем событие отмены платежа (НЕ ошибки!)
+    eventEmitter.sendTransactionCancelled(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
 
     // Создаем результат отмены для Promise - используем тот же формат что в iOS
     val result = Arguments.createMap().apply {

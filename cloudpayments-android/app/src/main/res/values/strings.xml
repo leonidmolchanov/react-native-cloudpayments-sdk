@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name" translatable="false">CloudPayments Demo</string>
+
+    <!-- Common -->
+    <string name="common_no_internet_connection" translatable="false">Отсутствует соединение с интернетом</string>
+
+    <!-- Main Activity -->
+    <string name="main_title" translatable="false">CloudPayments</string>
+
+    <string name="menu_one_stage_payment" translatable="false">Одностадийная оплата</string>
+    <string name="menu_two_stage_payment" translatable="false">Двухстадийная оплата</string>
+
+</resources>

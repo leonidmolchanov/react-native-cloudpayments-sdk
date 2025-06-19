@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="16dp">
+
+    <ImageView
+        android:id="@+id/image_drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/drag_handle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/text_title"
+        style="@style/cpsdk_TextTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cpsdk_text_options_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_drag_handle" />
+
+    <LinearLayout
+        android:id="@+id/layout_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_title">
+
+        <Button
+            android:id="@+id/button_pay_card"
+            style="@style/cpsdk_ButtonBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cpsdk_text_options_card"/>
+
+        <FrameLayout
+            android:id="@+id/button_t_pay"
+            style="@style/cpsdk_ButtonBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/cpsdk_bg_rounded_t_pay_button"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/button_t_pay_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/cpsdk_button_t_pay"/>
+
+            <ProgressBar
+                android:id="@+id/button_t_pay_progress"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/cpsdk_white" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/button_sber_pay"
+            style="@style/cpsdk_ButtonBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/cpsdk_bg_rounded_sber_pay_button"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/button_sber_pay_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/cpsdk_button_sber_pay"/>
+
+            <ProgressBar
+                android:id="@+id/button_sber_pay_progress"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/cpsdk_white" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/button_sbp"
+            style="@style/cpsdk_ButtonBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/cpsdk_bg_rounded_sbp_button"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/button_sbp_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/cpsdk_button_sbp"/>
+
+            <ProgressBar
+                android:id="@+id/button_sbp_progress"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/cpsdk_white" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/button_mir_pay"
+            style="@style/cpsdk_ButtonBlue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/cpsdk_bg_rounded_mir_pay_button"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/button_mir_pay_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/cpsdk_button_mir_pay"/>
+
+            <ProgressBar
+                android:id="@+id/button_mir_pay_progress"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/cpsdk_white" />
+        </FrameLayout>
+
+        <include
+            android:id="@+id/button_googlepay"
+            layout="@layout/layout_googlepay_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view_block_buttons"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        style="@style/cpsdk_BlockButtonView"
+        app:layout_constraintBottom_toBottomOf="@id/layout_buttons"
+        app:layout_constraintEnd_toEndOf="@id/layout_buttons"
+        app:layout_constraintStart_toStartOf="@id/layout_buttons"
+        app:layout_constraintTop_toTopOf="@id/layout_buttons" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_save_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:button="@drawable/cpsdk_ic_checkbox_selector"
+        android:fontFamily="@font/sf_pro_text_regular"
+        android:gravity="center_vertical"
+        android:letterSpacing="0.01"
+        android:lineSpacingExtra="6sp"
+        android:paddingStart="10dp"
+        android:text="@string/cpsdk_text_options_save_card"
+        android:textColor="#8c949f"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_buttons" />
+
+    <ImageView
+        android:id="@+id/button_save_card_popup"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="-2dp"
+        android:src="@drawable/cpsdk_ic_save_card_popup"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/checkbox_save_card"
+        app:layout_constraintStart_toEndOf="@id/checkbox_save_card" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_send_receipt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:button="@drawable/cpsdk_ic_checkbox_selector"
+        android:fontFamily="@font/sf_pro_text_regular"
+        android:gravity="center_vertical"
+        android:letterSpacing="0.01"
+        android:lineSpacingExtra="6sp"
+        android:paddingStart="10dp"
+        android:text="@string/cpsdk_text_options_email_checkbox"
+        android:textColor="#8c949f"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkbox_save_card" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_field_email"
+        style="@style/cpsdk_TextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/cpsdk_text_options_email_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkbox_send_receipt">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_email"
+            style="@style/cpsdk_TextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="textEmailAddress"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/text_email_require"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:drawableStart="@drawable/ic_required_email"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/sf_pro_text_regular"
+        android:letterSpacing="-0.01"
+        android:lineSpacingExtra="5sp"
+        android:text="@string/cpsdk_text_options_email_require"
+        android:textColor="#8c949f"
+        android:textSize="13sp"
+        android:textStyle="normal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_field_email" />
+
+    <TextView
+        android:id="@+id/text_card_be_saved"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/sf_pro_text_regular"
+        android:letterSpacing="-0.01"
+        android:lineSpacingExtra="5sp"
+        android:text="@string/cpsdk_text_options_card_be_saved"
+        android:textColor="#8c949f"
+        android:textSize="13sp"
+        android:textStyle="normal"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_email_require" />
+
+    <ImageView
+        android:id="@+id/button_card_be_saved_popup"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="-2dp"
+        android:src="@drawable/cpsdk_ic_save_card_popup"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/text_card_be_saved"
+        app:layout_constraintStart_toEndOf="@id/text_card_be_saved" />
+
+    <ImageView
+        android:layout_width="210dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/cpsdk_margin_big"
+        android:src="@drawable/cpsdk_secured_logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_card_be_saved" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -89,6 +89,18 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
     }
     
     /**
+     * Отправка события отмены платежа
+     */
+    fun sendTransactionCancelled(message: String? = null) {
+        sendPaymentFormEvent(
+            action = EPaymentFormAction.TRANSACTION.rawValue,
+            statusCode = false,
+            message = message,
+            errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue
+        )
+    }
+    
+    /**
      * Отправка события отображения формы
      */
     fun sendFormWillDisplay() {

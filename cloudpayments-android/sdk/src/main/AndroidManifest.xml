@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".ui.PaymentActivity"
+            android:theme="@style/cpsdk_AcquiringTheme"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleInstance"
+            android:exported="true">
+
+            <intent-filter android:label="Run CP SDK">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="cloudpayments"
+                    android:host="sdk.cp.ru" />
+            </intent-filter>
+
+        </activity>
+    </application>
+</manifest>
