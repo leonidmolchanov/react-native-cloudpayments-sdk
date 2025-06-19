@@ -5,8 +5,63 @@ import tsparser from '@typescript-eslint/parser';
 
 export default [
   js.configs.recommended,
+  // Node.js configuration files
+  {
+    files: [
+      '*.config.js',
+      'babel.config.js',
+      'example/babel.config.js',
+      'example/jest.config.js',
+      'example/metro.config.js',
+      'example/react-native.config.js',
+      'docs/docusaurus.config.js',
+      'scripts/**/*.js',
+    ],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
+      },
+    },
+    plugins: {
+      prettier,
+    },
+    rules: {
+      'prettier/prettier': [
+        'error',
+        {
+          quoteProps: 'consistent',
+          singleQuote: true,
+          tabWidth: 2,
+          trailingComma: 'es5',
+          useTabs: false,
+        },
+      ],
+      'no-unused-vars': 'warn',
+    },
+  },
+  // React/JavaScript files
   {
     files: ['**/*.{js,jsx}'],
+    ignores: [
+      '*.config.js',
+      'babel.config.js',
+      'example/babel.config.js',
+      'example/jest.config.js',
+      'example/metro.config.js',
+      'example/react-native.config.js',
+      'docs/docusaurus.config.js',
+      'scripts/**/*.js',
+    ],
     plugins: {
       prettier,
     },
