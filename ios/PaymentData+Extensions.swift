@@ -7,7 +7,7 @@ extension PaymentData {
             let amount = input["amount"] as? String,
             let currency = input["currency"] as? String
         else {
-            print("❌ Ошибка: нет обязательных параметров amount и currency")
+    
             return nil
         }
 

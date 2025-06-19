@@ -22,7 +22,7 @@ public class CloudpaymentsSdkImpl: NSObject {
       }
   @objc(sendEvent:name:)
   public func sendEvent(name: String, data: [String: Any]) {
-        print("ACTION \(data)")
+
           eventEmitter?.sendEvent(withName: name, body: data)
       }
 

@@ -48,18 +48,13 @@ extension CloudpaymentsCardIOService: PaymentCardScanner {
      * @return UIViewController для презентации или nil при ошибке
      */
     public func startScanner(completion: @escaping (String?, UInt?, UInt?, String?) -> Void) -> UIViewController? {
-        print("🔍 CloudpaymentsCardIOService.startScanner: Запуск")
-        
         // Сохраняем callback для передачи результатов
         self.scannerCompletion = completion
 
         // Создаем CardIO контроллер
         guard let scanController = CardIOPaymentViewController(paymentDelegate: self) else {
-            print("❌ CloudpaymentsCardIOService.startScanner: Ошибка инициализации CardIO")
             return nil
         }
-
-        print("✅ CloudpaymentsCardIOService.startScanner: CardIO контроллер создан")
         
         // Базовые настройки
         scanController.collectExpiry = true
@@ -94,7 +89,7 @@ extension CloudpaymentsCardIOService: PaymentCardScanner {
             controller.allowFreelyRotatingCardGuide = allowFreelyRotatingCardGuide
         }
         
-        print("✅ CloudpaymentsCardIOService: Конфигурация применена")
+
     }
 }
 
@@ -106,7 +101,6 @@ extension CloudpaymentsCardIOService: CardIOPaymentViewControllerDelegate {
      * Пользователь отменил сканирование
      */
     public func userDidCancel(_ paymentViewController: CardIOPaymentViewController!) {
-        print("🔍 CloudpaymentsCardIOService: Пользователь отменил сканирование")
         paymentViewController.dismiss(animated: true, completion: nil)
     }
 
@@ -116,9 +110,6 @@ extension CloudpaymentsCardIOService: CardIOPaymentViewControllerDelegate {
      * @param paymentViewController CardIO контроллер
      */
     public func userDidProvide(_ cardInfo: CardIOCreditCardInfo!, in paymentViewController: CardIOPaymentViewController!) {
-        print("🎯 CloudpaymentsCardIOService: Карта отсканирована успешно")
-        print("📱 CloudpaymentsCardIOService: Номер=\(cardInfo.cardNumber ?? "nil"), Месяц=\(cardInfo.expiryMonth), Год=\(cardInfo.expiryYear), CVV=\(cardInfo.cvv ?? "nil")")
-        
         // Передаем данные карты через callback
         self.scannerCompletion?(
             cardInfo.cardNumber,

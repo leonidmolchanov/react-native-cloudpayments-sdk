@@ -23,20 +23,15 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
      * @param params Параметры события (опционально)
      */
     fun sendEvent(eventName: String, params: WritableMap?) {
-        android.util.Log.d("CloudPayments", "sendEvent called - eventName: $eventName, params: $params")
-        android.util.Log.d("CloudPayments", "hasActiveCatalystInstance: ${reactContext.hasActiveCatalystInstance()}")
-        
         if (reactContext.hasActiveCatalystInstance()) {
             try {
                 reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                     .emit(eventName, params)
-                android.util.Log.d("CloudPayments", "Event sent successfully")
             } catch (e: Exception) {
+                // Критическая ошибка - оставляем для отладки
                 android.util.Log.e("CloudPayments", "Failed to send event: ${e.message}", e)
             }
-        } else {
-            android.util.Log.w("CloudPayments", "Cannot send event - no active catalyst instance")
         }
     }
     
@@ -90,16 +85,12 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
      * Отправка события ошибки транзакции
      */
     fun sendTransactionError(message: String, errorCode: String? = null) {
-        android.util.Log.d("CloudPayments", "sendTransactionError called - message: $message, errorCode: $errorCode")
-        
         sendPaymentFormEvent(
             action = EPaymentFormAction.TRANSACTION.rawValue,
             statusCode = false,
             message = message,
             errorCode = errorCode
         )
-        
-        android.util.Log.d("CloudPayments", "sendTransactionError completed")
     }
     
     /**
