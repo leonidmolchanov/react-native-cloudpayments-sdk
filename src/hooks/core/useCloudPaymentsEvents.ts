@@ -97,6 +97,7 @@ export const useCloudPaymentsEvents = (
 
   const [state, setState] = useState<ICloudPaymentsBaseState>(INITIAL_STATE);
   const subscriptionsRef = useRef<EmitterSubscription[]>([]);
+  const transactionProcessedRef = useRef(false);
 
   const {
     enabledEvents = DEFAULT_ENABLED_EVENTS,
@@ -195,13 +196,25 @@ export const useCloudPaymentsEvents = (
 
         case 'didHide':
           // Форма скрыта - сбрасываем состояние если не было транзакции
-          if (state.status !== 'success' && state.status !== 'error') {
+          if (!transactionProcessedRef.current) {
             setStatus('cancelled');
             onCancel?.();
           }
+          // Сбрасываем флаг для следующего платежа
+          transactionProcessedRef.current = false;
+          break;
+
+        case 'cancelled':
+          // НОВОЕ: Обработка специального события отмены платежа
+          transactionProcessedRef.current = true;
+          setStatus('cancelled');
+          onCancel?.();
           break;
 
         case 'transaction':
+          // Отмечаем что транзакция была обработана
+          transactionProcessedRef.current = true;
+
           if (event.statusCode) {
             // Успешная транзакция
             const transactionId = event.transactionId || null;
@@ -227,7 +240,7 @@ export const useCloudPaymentsEvents = (
           console.warn('Неизвестное действие платежной формы:', event.action);
       }
     },
-    [state.status, setStatus, setError, onSuccess, onError, onCancel]
+    [setStatus, setError, onSuccess, onError, onCancel]
   );
 
   // ============================================================================
