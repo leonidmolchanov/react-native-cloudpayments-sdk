@@ -48,7 +48,13 @@ enum class EPaymentConfigKeys(val rawValue: String) {
     SUCCESS_REDIRECT_URL("successRedirectUrl"),
     FAIL_REDIRECT_URL("failRedirectUrl"),
     SAVE_CARD_SINGLE_PAYMENT_MODE("saveCardSinglePaymentMode"),
-    SHOW_RESULT_SCREEN("showResultScreen")
+    SHOW_RESULT_SCREEN("showResultScreen"),
+    RECEIPT("receipt"),
+    CLOUDPAYMENTS("CloudPayments"),
+    CUSTOMER_RECEIPT("CustomerReceipt"),
+    RECURRENT("recurrent"),
+    UPPER_RECURRENT("Recurrent"),
+
 }
 
 // MARK: - Payment Methods
@@ -178,28 +184,27 @@ object EAndroidSpecific {
     const val FAILED_PROCESSING_ERROR = "FAILED_PROCESSING_ERROR"
     const val PAYMENT_FORM_ERROR = "PAYMENT_FORM_ERROR"
 }
-
 // MARK: - CardIO Configuration Keys
 
 enum class ECardIOConfigKeys(val rawValue: String) {
-    REQUIRE_EXPIRY("requireExpiry"),
-    REQUIRE_CVV("requireCVV"),
-    REQUIRE_POSTAL_CODE("requirePostalCode"),
-    REQUIRE_CARDHOLDER_NAME("requireCardholderName"),
-    HIDE_CARDIO_LOGO("hideCardIOLogo"),
-    USE_PAYPAL_LOGO("usePayPalLogo"),
-    SUPPRESS_MANUAL_ENTRY("suppressManualEntry"),
-    ACTION_BAR_COLOR("actionBarColor"),
-    GUIDE_COLOR("guideColor"),
-    LANGUAGE("language"),
-    SUPPRESS_CONFIRMATION("suppressConfirmation"),
-    SUPPRESS_SCAN("suppressScan"),
-    KEEP_APPLICATION_THEME("keepApplicationTheme")
+  REQUIRE_EXPIRY("requireExpiry"),
+  REQUIRE_CVV("requireCVV"),
+  REQUIRE_POSTAL_CODE("requirePostalCode"),
+  REQUIRE_CARDHOLDER_NAME("requireCardholderName"),
+  HIDE_CARDIO_LOGO("hideCardIOLogo"),
+  USE_PAYPAL_LOGO("usePayPalLogo"),
+  SUPPRESS_MANUAL_ENTRY("suppressManualEntry"),
+  ACTION_BAR_COLOR("actionBarColor"),
+  GUIDE_COLOR("guideColor"),
+  LANGUAGE("language"),
+  SUPPRESS_CONFIRMATION("suppressConfirmation"),
+  SUPPRESS_SCAN("suppressScan"),
+  KEEP_APPLICATION_THEME("keepApplicationTheme")
 }
 
 // MARK: - CardIO Constants
 
 object ECardIOConstants {
-    const val ENABLE_CARD_SCANNER = "enableCardScanner"
-    const val CARD_SCANNER_CONFIG = "cardScannerConfig"
+  const val ENABLE_CARD_SCANNER = "enableCardScanner"
+  const val CARD_SCANNER_CONFIG = "cardScannerConfig"
 }

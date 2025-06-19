@@ -21,7 +21,7 @@ const CloudpaymentsSdk = NativeModules.CloudpaymentsSdk
 export { PaymentService, CardService } from './services';
 
 // Экспорт типов
-export type * from './types';
+export * from './types';
 
 // Экспорт енумов как значений
 export * from './types/enums';

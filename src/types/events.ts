@@ -76,7 +76,13 @@ export interface IPaymentFormEvent extends ICloudPaymentsBaseEvent {
    * Действие платежной формы
    * @description Тип события из жизненного цикла платежной формы.
    */
-  action: 'willDisplay' | 'didDisplay' | 'willHide' | 'didHide' | 'transaction';
+  action:
+    | 'willDisplay'
+    | 'didDisplay'
+    | 'willHide'
+    | 'didHide'
+    | 'transaction'
+    | 'cancelled';
 
   /**
    * Код статуса (для транзакций)

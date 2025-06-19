@@ -17,15 +17,18 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useCloudPayments } from '@lmapp/react-native-cloudpayments';
+import {
+  useCloudPayments,
+  RECURENT_PERIOD,
+} from '@lmapp/react-native-cloudpayments';
 import type {
   IPaymentData,
   ReceiptItem,
   Amounts,
   Receipt,
+  Recurrent,
   IPayer,
 } from '@lmapp/react-native-cloudpayments';
-import { KEY } from './key';
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -38,7 +41,7 @@ import { KEY } from './key';
  *
  * Формат: pk_xxxxxxxxxxxxxxxxxxxxxxxx
  */
-const PUBLIC_ID = KEY; // TODO: Замените на ваш ключ!
+const PUBLIC_ID = ''; // TODO: Замените на ваш ключ!
 
 // ============================================================================
 // TYPES
@@ -91,10 +94,10 @@ const SECTIONS: ISection[] = [
 // Товары в чеке
 const receiptItems: ReceiptItem[] = [
   {
-    label: 'Премиум подписка',
-    price: 999,
+    label: ' подписка',
+    price: 123,
     quantity: 1,
-    amount: 999,
+    amount: 123,
     vat: null,
     method: 4, // Полная предварительная оплата до момента передачи предмета расчета
     object: 4, // Услуга
@@ -140,16 +143,37 @@ const receipt: Receipt = {
   amounts: amounts,
 };
 
-// Дополнительные данные (БЕЗ дублирования чека)
+const recurrent: Recurrent = {
+  interval: RECURENT_PERIOD.MONTH,
+  period: 1,
+  customerReceipt: receipt, //чек для регулярных платежей
+};
+
 const jsonData = {
-  SubscriptionId: 'com.df.twenty.diamonds',
-  CustomerInfo: {
-    age: 27,
-    loyaltyLevel: 'premium',
-  },
-  OrderInfo: {
-    source: 'mobile_app',
-    campaign: 'summer_2024',
+  SubscriptionId: 'testIdSubscription',
+  CloudPayments: {
+    CustomerReceipt: {
+      Items: [
+        {
+          label: 'Оплата товара',
+          price: 0.99,
+          quantity: 1,
+          amount: 0.99,
+          vat: null,
+          method: 4,
+          object: 4,
+        },
+      ],
+      taxationSystem: 2,
+      isBso: false,
+      amounts: {
+        electronic: 0.99,
+        advancePayment: 0,
+        credit: 0,
+        provision: 0,
+      },
+    },
+    // recurrent
   },
 };
 
@@ -157,7 +181,7 @@ const jsonData = {
 const SAMPLE_PAYMENT_DATA: IPaymentData = {
   amount: '1000.00',
   currency: 'RUB',
-  description: 'Тестовый платеж из Example App',
+  description: 'Тестовый платеж из CP App',
   email: 'test@example.com',
   accountId: 'user_12345',
   publicId: PUBLIC_ID,
@@ -165,6 +189,7 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   showResultScreen: true,
   payer: payer,
   receipt: receipt,
+  recurrent: recurrent,
   jsonData: jsonData,
   enableCardScanner: true, // Включаем сканер карт для Android
   cardScannerConfig: {

@@ -14,6 +14,10 @@ sidebar_position: 1
 - **Java**: 8 или выше
 - **Kotlin**: 1.8.0 или выше
 
+:::info CardIO поддержка
+На Android платформе CardIO сканер банковских карт поддерживается полностью и работает на всех устройствах с API Level 21+.
+:::
+
 ## ⚙️ Настройка проекта
 
 ### 1. Обновление `android/build.gradle`
@@ -105,6 +109,14 @@ dependencies {
     <!-- Разрешения для интернета -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Разрешения для CardIO сканера карт -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- Камера необязательна для работы приложения -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <!-- Основная активность -->
     <activity
@@ -158,6 +170,171 @@ const checkGooglePay = async () => {
   }
 };
 ```
+
+## 📷 CardIO - Сканер банковских карт
+
+### Полная поддержка на Android
+
+CardIO сканер банковских карт полностью поддерживается на Android платформе и предоставляет богатые возможности кастомизации.
+
+### Разрешения
+
+Убедитесь, что в `AndroidManifest.xml` добавлены необходимые разрешения (уже включены выше):
+
+```xml title="android/app/src/main/AndroidManifest.xml"
+<!-- Обязательные разрешения -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.VIBRATE" />
+
+<!-- Опциональные возможности -->
+<uses-feature android:name="android.hardware.camera" android:required="false" />
+<uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+```
+
+### Основное использование
+
+```typescript
+import { 
+  ECardIOLanguage, 
+  ECardIOColorScheme 
+} from '@lmapp/react-native-cloudpayments';
+import type { ICardIOConfig, IPaymentData } from '@lmapp/react-native-cloudpayments';
+
+const cardScannerConfig: ICardIOConfig = {
+  // Поля карты
+  requireExpiry: true,
+  requireCVV: false,              // НЕ РЕКОМЕНДУЕТСЯ по соображениям безопасности
+  requirePostalCode: false,
+  requireCardholderName: false,
+
+  // Интерфейс
+  hideCardIOLogo: true,
+  usePayPalLogo: false,
+  suppressManualEntry: false,
+
+  // Кастомные цвета для Android
+  actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
+  guideColor: ECardIOColorScheme.MATERIAL_GREEN,
+
+  // Локализация
+  language: ECardIOLanguage.RUSSIAN,
+
+  // Дополнительные настройки
+  suppressConfirmation: false,    // Вибрация при сканировании
+  suppressScan: false,           // Звук при сканировании
+  keepApplicationTheme: true     // Использовать тему приложения
+};
+
+const paymentData: IPaymentData = {
+  publicId: 'pk_test_1234567890abcdef',
+  amount: '1000.00',
+  currency: 'RUB',
+  description: 'Тестовый платеж',
+  enableCardScanner: true,
+  cardScannerConfig: cardScannerConfig
+};
+```
+
+### Проверка разрешений
+
+```typescript
+import { PermissionsAndroid, Platform } from 'react-native';
+
+const requestCameraPermission = async (): Promise<boolean> => {
+  if (Platform.OS !== 'android') return true;
+
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: 'Разрешение на использование камеры',
+        message: 'Приложению требуется доступ к камере для сканирования банковских карт',
+        buttonNeutral: 'Спросить позже',
+        buttonNegative: 'Отмена',
+        buttonPositive: 'OK',
+      }
+    );
+
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  } catch (err) {
+    console.warn('Ошибка запроса разрешения камеры:', err);
+    return false;
+  }
+};
+
+// Использование перед запуском платежа
+const handlePayment = async () => {
+  const hasCameraPermission = await requestCameraPermission();
+  
+  const paymentData: IPaymentData = {
+    // ... базовые поля
+    enableCardScanner: hasCameraPermission, // Включаем только при наличии разрешения
+    cardScannerConfig: hasCameraPermission ? {
+      requireExpiry: true,
+      language: ECardIOLanguage.RUSSIAN
+    } : undefined
+  };
+
+  await presentPaymentForm(paymentData);
+};
+```
+
+### Кастомизация под бренд приложения
+
+```typescript
+// Пример для корпоративного стиля
+const corporateConfig: ICardIOConfig = {
+  hideCardIOLogo: true,
+  actionBarColor: '#1565C0',        // Корпоративный синий
+  guideColor: '#FFC107',            // Корпоративный желтый
+  language: ECardIOLanguage.RUSSIAN,
+  keepApplicationTheme: true,
+  suppressManualEntry: false        // Оставить выбор пользователю
+};
+
+// Минималистичный стиль
+const minimalConfig: ICardIOConfig = {
+  hideCardIOLogo: true,
+  actionBarColor: '#FFFFFF',
+  guideColor: '#000000',
+  suppressConfirmation: true,       // Без вибрации
+  suppressScan: true,              // Без звука
+  keepApplicationTheme: true
+};
+```
+
+### Отладка CardIO на Android
+
+```typescript
+// Проверка поддержки CardIO
+const checkCardIOSupport = () => {
+  if (Platform.OS !== 'android') {
+    console.log('CardIO полностью поддерживается только на Android');
+    return false;
+  }
+
+  // На Android всегда поддерживается (API 21+)
+  return true;
+};
+
+// Логирование конфигурации
+const debugConfig: ICardIOConfig = {
+  requireExpiry: true,
+  language: ECardIOLanguage.RUSSIAN,
+  actionBarColor: ECardIOColorScheme.MATERIAL_BLUE
+};
+
+console.log('CardIO конфигурация:', JSON.stringify(debugConfig, null, 2));
+```
+
+### Производительность
+
+CardIO на Android оптимизирован для:
+
+- **Быстрое распознавание:** Обычно 1-3 секунды для четкого изображения карты
+- **Низкое энергопотребление:** Эффективное использование камеры и процессора
+- **Поддержка всех устройств:** Работает на устройствах с API Level 21+
+- **Автофокус:** Автоматическая фокусировка для лучшего качества сканирования
 
 ## 🔗 Deep Links
 

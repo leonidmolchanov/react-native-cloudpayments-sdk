@@ -78,7 +78,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
   // CloudPayments SDK
-  implementation 'ru.cloudpayments.gitpub.integrations.sdk:cloudpayments-android:1.7.1'
+  implementation 'ru.cloudpayments.gitpub.integrations.sdk:cloudpayments-android:1.6.0'
 
   // CardIO для сканирования карт
   implementation 'io.card:android-sdk:5.5.1'

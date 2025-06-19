@@ -3,7 +3,7 @@ PODS:
   - Cloudpayments (1.6.0):
     - CloudpaymentsNetworking
   - CloudpaymentsNetworking (1.0.2)
-  - CloudpaymentsSdk (0.1.6):
+  - CloudpaymentsSdk (0.1.8):
     - Cloudpayments
     - CloudpaymentsNetworking
     - DoubleConversion
@@ -1930,7 +1930,7 @@ SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   Cloudpayments: 7e37f89de6293457d8ae7d25d2762da3394ac7b4
   CloudpaymentsNetworking: 8d7f72b94360dcf3846ac10d9c479ec7a57f19b8
-  CloudpaymentsSdk: 953feca3821db1bb8fccb389bdc28c12e0643198
+  CloudpaymentsSdk: 5cb3968f53cf5a9d2a190e287699626ec867ffeb
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975

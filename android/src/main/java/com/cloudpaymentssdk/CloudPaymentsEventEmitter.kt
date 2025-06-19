@@ -103,6 +103,19 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
     }
     
     /**
+     * Отправка события отмены платежа
+     * ИСПРАВЛЕНО: теперь отправляет специальное событие отмены, а не ошибки
+     */
+    fun sendTransactionCancelled(message: String? = null) {
+        sendPaymentFormEvent(
+            action = "cancelled", // Специальное действие для отмены
+            statusCode = false,
+            message = message ?: EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue,
+            errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue
+        )
+    }
+    
+    /**
      * Отправка события отображения формы
      */
     fun sendFormWillDisplay() {
