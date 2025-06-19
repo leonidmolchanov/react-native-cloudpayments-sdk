@@ -21,6 +21,12 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private var eventEmitter = CloudPaymentsEventEmitter(reactContext)
   private var pendingPromise: Promise? = null
   private var isProcessingResult = false // Защита от повторной обработки
+  
+  // НОВОЕ: Переменные для отслеживания последней ошибки
+  private var lastPaymentError: String? = null
+  private var lastPaymentErrorCode: String? = null
+  private var hasActivePaymentAttempt = false
+  private var paymentStartTime: Long = 0L
 
   companion object {
     const val NAME = EModuleNames.CLOUDPAYMENTS_SDK
@@ -219,8 +225,14 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       // Сохраняем Promise для обработки результата
       pendingPromise = promise
       
-      // Сбрасываем флаг обработки результата для нового платежа
+      // Сбрасываем флаги для нового платежа
       isProcessingResult = false
+      
+      // НОВОЕ: Очищаем предыдущие ошибки при начале нового платежа
+      lastPaymentError = null
+      lastPaymentErrorCode = null
+      hasActivePaymentAttempt = true
+      paymentStartTime = System.currentTimeMillis()
 
       // Создаем конфигурацию платежа
       val configuration = PaymentDataConverter.createPaymentConfiguration(currentPublicId, paymentData)
@@ -259,34 +271,96 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private fun handlePaymentResult(resultCode: Int, data: Intent?) {
     // ЗАЩИТА: Предотвращаем повторную обработку результата
     if (isProcessingResult) {
+      android.util.Log.d(EModuleNames.TAG, "handlePaymentResult: уже обрабатывается, пропускаем")
       return
     }
     
     isProcessingResult = true
+    
+    // ОТЛАДКА: Логируем все параметры
+    android.util.Log.d(EModuleNames.TAG, "=== handlePaymentResult START ===")
+    android.util.Log.d(EModuleNames.TAG, "resultCode: $resultCode")
+    android.util.Log.d(EModuleNames.TAG, "data: $data")
+    
+    val transactionStatus = getTransactionStatus(data)
+    val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
+    val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+    
+    android.util.Log.d(EModuleNames.TAG, "transactionStatus: $transactionStatus")
+    android.util.Log.d(EModuleNames.TAG, "transactionId: $transactionId")
+    android.util.Log.d(EModuleNames.TAG, "reasonCode: $reasonCode")
+    android.util.Log.d(EModuleNames.TAG, "lastPaymentError: $lastPaymentError")
+    android.util.Log.d(EModuleNames.TAG, "lastPaymentErrorCode: $lastPaymentErrorCode")
+    
+    // НОВОЕ: Проверяем, есть ли URL с информацией об ошибке (например, из 3D Secure)
+    val dataString = data?.dataString
+    android.util.Log.d(EModuleNames.TAG, "dataString: $dataString")
+    
+    if (dataString != null && dataString.contains("threeds/fail")) {
+      android.util.Log.d(EModuleNames.TAG, "Обнаружен URL ошибки 3D Secure")
+      // Извлекаем информацию об ошибке из URL
+      try {
+        val uri = android.net.Uri.parse(dataString)
+        val success = uri.getQueryParameter("Success")
+        val reasonCodeFromUrl = uri.getQueryParameter("ReasonCode")
+        val transactionIdFromUrl = uri.getQueryParameter("TransactionId")
+        
+        android.util.Log.d(EModuleNames.TAG, "3DS URL - Success: $success, ReasonCode: $reasonCodeFromUrl, TransactionId: $transactionIdFromUrl")
+        
+        if (success == "False" && reasonCodeFromUrl != null) {
+          // Создаем фиктивный Intent с данными об ошибке
+          val errorIntent = android.content.Intent().apply {
+            putExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name, CloudpaymentsSDK.TransactionStatus.Failed)
+            putExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, reasonCodeFromUrl.toIntOrNull() ?: 0)
+            transactionIdFromUrl?.toLongOrNull()?.let { 
+              putExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, it)
+            }
+          }
+          
+          android.util.Log.d(EModuleNames.TAG, "Обрабатываем как ошибку 3D Secure -> handleFailedPayment")
+          eventEmitter.sendFormWillHide()
+          handleFailedPayment(errorIntent)
+          eventEmitter.sendFormDidHide()
+          
+          // Очищаем Promise и сбрасываем флаги
+          pendingPromise = null
+          isProcessingResult = false
+          hasActivePaymentAttempt = false
+          
+          android.util.Log.d(EModuleNames.TAG, "=== handlePaymentResult END (3DS Error) ===")
+          return
+        }
+      } catch (e: Exception) {
+        android.util.Log.e(EModuleNames.TAG, "Ошибка парсинга URL 3D Secure: ${e.message}")
+      }
+    }
     
     // Отправляем события
     eventEmitter.sendFormWillHide()
 
     when (resultCode) {
       Activity.RESULT_OK -> {
-        // Используем улучшенную функцию для получения статуса
-        val transactionStatus = getTransactionStatus(data)
-        val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
-
+        android.util.Log.d(EModuleNames.TAG, "RESULT_OK - анализируем статус")
+        
         when (transactionStatus) {
           CloudpaymentsSDK.TransactionStatus.Succeeded -> {
+            android.util.Log.d(EModuleNames.TAG, "Статус: Succeeded -> handleSuccessfulPayment")
             handleSuccessfulPayment(data)
           }
           CloudpaymentsSDK.TransactionStatus.Failed -> {
+            android.util.Log.d(EModuleNames.TAG, "Статус: Failed -> handleFailedPayment")
             handleFailedPayment(data)
           }
           null -> {
+            android.util.Log.d(EModuleNames.TAG, "Статус: null - проверяем transactionId")
             // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: правильная обработка неизвестного статуса
             // Если статус неизвестен, но resultCode = OK, проверяем наличие transactionId
             if (transactionId > 0L) {
+              android.util.Log.d(EModuleNames.TAG, "transactionId > 0 -> handleSuccessfulPayment")
               // Если есть transactionId, значит платеж прошел успешно
               handleSuccessfulPayment(data)
             } else {
+              android.util.Log.d(EModuleNames.TAG, "transactionId <= 0 -> handleFailedPayment")
               // Если нет transactionId, значит была ошибка
               handleFailedPayment(data)
             }
@@ -295,32 +369,34 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       }
 
       Activity.RESULT_CANCELED -> {
-        // УЛУЧШЕНО: Проверяем, есть ли данные об ошибке в Intent
-        val transactionStatus = getTransactionStatus(data)
-        val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
-        val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
+        android.util.Log.d(EModuleNames.TAG, "RESULT_CANCELED - анализируем причину")
         
         when {
           // Если статус явно указывает на неудачу - это ошибка
           transactionStatus == CloudpaymentsSDK.TransactionStatus.Failed -> {
+            android.util.Log.d(EModuleNames.TAG, "CANCELED + Failed статус -> handleFailedPayment")
             handleFailedPayment(data)
           }
           // Если есть код ошибки, но нет ID транзакции - это ошибка
           reasonCode > 0 && transactionId <= 0L -> {
+            android.util.Log.d(EModuleNames.TAG, "CANCELED + reasonCode > 0 -> handleFailedPayment")
             handleFailedPayment(data)
           }
           // Если есть ID транзакции - возможно успех (редкий случай)
           transactionId > 0L -> {
+            android.util.Log.d(EModuleNames.TAG, "CANCELED + transactionId > 0 -> handleSuccessfulPayment")
             handleSuccessfulPayment(data)
           }
           // Во всех остальных случаях - отмена пользователем
           else -> {
+            android.util.Log.d(EModuleNames.TAG, "CANCELED + обычная отмена -> handleCancelledPayment")
             handleCancelledPayment()
           }
         }
       }
 
       else -> {
+        android.util.Log.d(EModuleNames.TAG, "Неизвестный resultCode: $resultCode -> handleFailedPayment")
         // Любой другой код результата считаем ошибкой, а не отменой
         handleFailedPayment(data)
       }
@@ -328,9 +404,12 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
     eventEmitter.sendFormDidHide()
 
-    // Очищаем Promise и сбрасываем флаг
+    // Очищаем Promise и сбрасываем флаги
     pendingPromise = null
     isProcessingResult = false
+    hasActivePaymentAttempt = false
+    
+    android.util.Log.d(EModuleNames.TAG, "=== handlePaymentResult END ===")
   }
 
   /**
@@ -342,6 +421,11 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
       val transactionStatus = data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
       val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+
+      // НОВОЕ: Очищаем сохраненные ошибки при успешном платеже
+      lastPaymentError = null
+      lastPaymentErrorCode = null
+      paymentStartTime = 0L
 
       // Отправляем событие успешной транзакции
       eventEmitter.sendTransactionSuccess(
@@ -366,6 +450,8 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
    * Обработка неудачного платежа
    */
   private fun handleFailedPayment(data: Intent?) {
+    android.util.Log.d(EModuleNames.TAG, "=== handleFailedPayment START ===")
+    
     try {
       // Извлекаем данные об ошибке из Intent
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
@@ -376,44 +462,114 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       val errorCode = PaymentDataConverter.getErrorCodeFromReasonCode(reasonCode)
       val errorMessage = PaymentDataConverter.getErrorMessage(reasonCode)
 
-      // Отправляем событие ошибки транзакции
+      android.util.Log.d(EModuleNames.TAG, "errorCode: $errorCode")
+      android.util.Log.d(EModuleNames.TAG, "errorMessage: $errorMessage")
+
+      // ИСПРАВЛЕНО: Сохраняем информацию об ошибке для последующего использования
+      lastPaymentError = errorMessage
+      lastPaymentErrorCode = errorCode
+
+      android.util.Log.d(EModuleNames.TAG, "Сохранили ошибку: $lastPaymentError")
+
+      // Отправляем событие ошибки транзакции (для уведомления UI)
       eventEmitter.sendTransactionError(
         message = errorMessage,
         errorCode = errorCode
       )
 
-      // Создаем результат с ошибкой для Promise - используем тот же формат что в iOS
-      val result = Arguments.createMap().apply {
-        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
-        putString(EResponseKeys.ERROR_CODE.rawValue, errorCode)
-        putString(EResponseKeys.MESSAGE.rawValue, errorMessage)
-        if (transactionId != EDefaultValues.DEFAULT_TRANSACTION_ID) {
-          putDouble(EResponseKeys.TRANSACTION_ID.rawValue, transactionId.toDouble())
-        }
-      }
+      android.util.Log.d(EModuleNames.TAG, "Отправили событие ошибки")
 
-      pendingPromise?.resolve(result)
+      // ВАЖНО: НЕ resolve Promise здесь! 
+      // Promise будет resolve-ан в handleCancelledPayment() когда пользователь закроет форму
+      
     } catch (e: Exception) {
+      android.util.Log.e(EModuleNames.TAG, "Исключение в handleFailedPayment: ${e.message}")
+      // Только в случае исключения resolve Promise с ошибкой
       pendingPromise?.reject(EAndroidSpecific.FAILED_PROCESSING_ERROR, e.message, e)
     }
+    
+    android.util.Log.d(EModuleNames.TAG, "=== handleFailedPayment END ===")
   }
 
   /**
    * Обработка отменённого платежа
    */
   private fun handleCancelledPayment() {
-    // Отправляем событие отмены платежа (НЕ ошибки!)
-    eventEmitter.sendTransactionCancelled(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
+    android.util.Log.d(EModuleNames.TAG, "=== handleCancelledPayment START ===")
+    android.util.Log.d(EModuleNames.TAG, "Проверяем lastPaymentError: $lastPaymentError")
+    android.util.Log.d(EModuleNames.TAG, "Проверяем lastPaymentErrorCode: $lastPaymentErrorCode")
+    
+    // НОВОЕ: Анализируем время работы формы
+    val paymentDuration = System.currentTimeMillis() - paymentStartTime
+    android.util.Log.d(EModuleNames.TAG, "Время работы формы: ${paymentDuration}ms")
+    
+    // УЛУЧШЕНО: Проверяем, была ли ошибка до закрытия формы
+    if (lastPaymentError != null && lastPaymentErrorCode != null) {
+      android.util.Log.d(EModuleNames.TAG, "Найдена сохраненная ошибка -> отправляем событие ошибки")
+      
+      // Если была ошибка, отправляем событие ошибки, а не отмены
+      eventEmitter.sendTransactionError(
+        message = lastPaymentError!!,
+        errorCode = lastPaymentErrorCode!!
+      )
 
-    // Создаем результат отмены для Promise - используем тот же формат что в iOS
-    val result = Arguments.createMap().apply {
-      putBoolean(EResponseKeys.SUCCESS.rawValue, false)
-      putString(EResponseKeys.STATUS.rawValue, EPaymentResultValues.CANCELLED.rawValue)
-      putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
-      putString(EResponseKeys.ERROR_CODE.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
+      // Создаем результат с ошибкой для Promise
+      val result = Arguments.createMap().apply {
+        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
+        putString(EResponseKeys.ERROR_CODE.rawValue, lastPaymentErrorCode!!)
+        putString(EResponseKeys.MESSAGE.rawValue, lastPaymentError!!)
+      }
+
+      android.util.Log.d(EModuleNames.TAG, "Resolve Promise с ошибкой")
+      pendingPromise?.resolve(result)
+    } else if (paymentDuration > 10000) {
+      // НОВАЯ ЛОГИКА: Если форма работала более 10 секунд, вероятно была ошибка 3D Secure
+      android.util.Log.d(EModuleNames.TAG, "Форма работала долго (${paymentDuration}ms) -> возможно была ошибка 3D Secure")
+      
+      // Предполагаем, что была ошибка 3D Secure
+      val errorMessage = "3-D Secure авторизация не пройдена"
+      val errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue
+      
+      eventEmitter.sendTransactionError(
+        message = errorMessage,
+        errorCode = errorCode
+      )
+
+      // Создаем результат с ошибкой для Promise
+      val result = Arguments.createMap().apply {
+        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
+        putString(EResponseKeys.ERROR_CODE.rawValue, errorCode)
+        putString(EResponseKeys.MESSAGE.rawValue, errorMessage)
+      }
+
+      android.util.Log.d(EModuleNames.TAG, "Resolve Promise с предполагаемой ошибкой 3D Secure")
+      pendingPromise?.resolve(result)
+    } else {
+      android.util.Log.d(EModuleNames.TAG, "Ошибки не найдено и форма работала недолго -> отправляем событие отмены")
+      
+      // Если ошибки не было, это действительно отмена пользователем
+      eventEmitter.sendTransactionCancelled(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
+
+      // Создаем результат отмены для Promise
+      val result = Arguments.createMap().apply {
+        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
+        putString(EResponseKeys.STATUS.rawValue, EPaymentResultValues.CANCELLED.rawValue)
+        putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
+        putString(EResponseKeys.ERROR_CODE.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
+      }
+
+      android.util.Log.d(EModuleNames.TAG, "Resolve Promise с отменой")
+      pendingPromise?.resolve(result)
     }
 
-    pendingPromise?.resolve(result)
+    // Очищаем сохраненные ошибки после обработки
+    lastPaymentError = null
+    lastPaymentErrorCode = null
+    hasActivePaymentAttempt = false
+    paymentStartTime = 0L
+    
+    android.util.Log.d(EModuleNames.TAG, "Очистили сохраненные ошибки")
+    android.util.Log.d(EModuleNames.TAG, "=== handleCancelledPayment END ===")
   }
 
   /**
