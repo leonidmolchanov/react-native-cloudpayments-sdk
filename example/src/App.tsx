@@ -41,7 +41,7 @@ import type {
  *
  * Формат: pk_xxxxxxxxxxxxxxxxxxxxxxxx
  */
-const PUBLIC_ID = 'pk_447cd08f0b46ce673b166687d35e4' // TODO: Замените на ваш ключ!
+const PUBLIC_ID = ''; // TODO: Замените на ваш ключ!
 
 // ============================================================================
 // TYPES

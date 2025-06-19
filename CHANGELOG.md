@@ -4,12 +4,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.1.7](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.6...v0.1.7) (2025-06-18)
 
-
 ### 🐛 Исправления
 
-* android data  ([3a98002](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/3a980025a99a38350d993fab646a433f443ca7f1))
-* ios data form transaction ([#8](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/issues/8)) ([6a413ab](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/6a413ab5e3f8578473b24ceb35c2f1771ff0bd3c))
-* key import ([6a6a7cd](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/6a6a7cdb4bbb6dcee8d90b30211ecd2947220862))
+- android data ([3a98002](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/3a980025a99a38350d993fab646a433f443ca7f1))
+- ios data form transaction ([#8](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/issues/8)) ([6a413ab](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/6a413ab5e3f8578473b24ceb35c2f1771ff0bd3c))
+- key import ([6a6a7cd](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/6a6a7cdb4bbb6dcee8d90b30211ecd2947220862))
 
 ### [0.1.6](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.5...v0.1.6) (2025-06-16)
 

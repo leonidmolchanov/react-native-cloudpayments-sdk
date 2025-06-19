@@ -179,7 +179,7 @@ export const useCloudPaymentsEvents = (
   /**
    * Обработчик событий платежной формы
    */
-    const handlePaymentFormEvent = useCallback(
+  const handlePaymentFormEvent = useCallback(
     (event: IPaymentFormEvent) => {
       switch (event.action) {
         case 'willDisplay':
