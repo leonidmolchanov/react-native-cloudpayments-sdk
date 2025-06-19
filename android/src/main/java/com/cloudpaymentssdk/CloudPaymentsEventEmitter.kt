@@ -24,9 +24,14 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
      */
     fun sendEvent(eventName: String, params: WritableMap?) {
         if (reactContext.hasActiveCatalystInstance()) {
-            reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                .emit(eventName, params)
+            try {
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit(eventName, params)
+            } catch (e: Exception) {
+                // Критическая ошибка - оставляем для отладки
+                android.util.Log.e("CloudPayments", "Failed to send event: ${e.message}", e)
+            }
         }
     }
     

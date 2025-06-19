@@ -18,6 +18,7 @@ buildscript {
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "kotlin-parcelize"
 
 apply plugin: "com.facebook.react"
 
@@ -79,12 +80,15 @@ dependencies {
   // CloudPayments SDK
   implementation 'ru.cloudpayments.gitpub.integrations.sdk:cloudpayments-android:1.6.0'
 
+  // CardIO для сканирования карт
+  implementation 'io.card:android-sdk:5.5.1'
+
   // Google Pay (опционально)
   implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 }
 
 react {
   jsRootDir = file("../src/")
-  libraryName = "CloudpaymentsSdk"
+  libraryName = "NativeCloudpaymentsSdk"
   codegenJavaPackageName = "com.cloudpaymentssdk"
 }

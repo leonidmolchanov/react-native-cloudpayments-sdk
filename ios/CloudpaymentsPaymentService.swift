@@ -226,12 +226,11 @@ public class CloudpaymentsPaymentService: NSObject {
   private func createPaymentConfiguration(from paymentData: [String: Any]) -> PaymentConfiguration? {
       guard let publicId = paymentData["publicId"] as? String,
             let paymentDataObj = self.createPaymentData(from: paymentData) else {
-          print("❌ Ошибка: нет publicId или данных платежа")
+  
           return nil
       }
 
-      print("✅ publicId в конфиге: \(publicId)")
-    print("✅ paymentDataObj в конфиге: \(paymentDataObj)")
+      
 
       return PaymentConfiguration(
           publicId: publicId,
@@ -333,7 +332,7 @@ extension PaymentIntentResponse {
                 return json
             }
         } catch {
-            print("Error converting PaymentIntentResponse to dictionary: \(error)")
+
         }
         return [:]
     }
@@ -348,7 +347,7 @@ extension SberPayResponse {
                 return json
             }
         } catch {
-            print("Error converting SberPayResponse to dictionary: \(error)")
+
         }
         return [:]
     }

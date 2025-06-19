@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
 
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/leonidmolchanov/react-native-cloudpayments-sdk.git", :tag => "#{s.version}" }
-
+  s.vendored_frameworks = 'ios/Frameworks/CardIO.xcframework'
 
 
   # CloudPayments SDK dependencies

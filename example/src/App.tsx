@@ -191,6 +191,31 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   receipt: receipt,
   recurrent: recurrent,
   jsonData: jsonData,
+  enableCardScanner: true, // Включаем сканер карт для Android
+  cardScannerConfig: {
+    // Настройки полей карты
+    requireExpiry: true,
+    requireCVV: false,
+    requirePostalCode: false,
+    requireCardholderName: false,
+
+    // Настройки интерфейса
+    hideCardIOLogo: true,
+    usePayPalLogo: false,
+    suppressManualEntry: false,
+
+    // Цветовая схема
+    // actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
+    // guideColor: ECardIOColorScheme.MATERIAL_GREEN,
+    //
+    // // Локализация
+    // language: ECardIOLanguage.RUSSIAN,
+
+    // Дополнительные настройки
+    suppressConfirmation: false,
+    suppressScan: false,
+    keepApplicationTheme: false,
+  },
 };
 
 // ============================================================================

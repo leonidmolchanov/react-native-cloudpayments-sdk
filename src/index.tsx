@@ -23,6 +23,9 @@ export { PaymentService, CardService } from './services';
 // Экспорт типов
 export * from './types';
 
+// Экспорт енумов как значений
+export * from './types/enums';
+
 // Экспорт событий
 export { eventEmitter } from './events';
 

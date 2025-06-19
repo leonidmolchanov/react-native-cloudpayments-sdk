@@ -21,7 +21,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private var eventEmitter = CloudPaymentsEventEmitter(reactContext)
   private var pendingPromise: Promise? = null
   private var isProcessingResult = false // Защита от повторной обработки
-  
+
   // НОВОЕ: Переменные для отслеживания последней ошибки
   private var lastPaymentError: String? = null
   private var lastPaymentErrorCode: String? = null
@@ -37,11 +37,11 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
      */
     private fun getTransactionStatus(data: Intent?): CloudpaymentsSDK.TransactionStatus? {
       if (data == null) return null
-      
+
       return try {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
           data.getSerializableExtra(
-            CloudpaymentsSDK.IntentKeys.TransactionStatus.name, 
+            CloudpaymentsSDK.IntentKeys.TransactionStatus.name,
             CloudpaymentsSDK.TransactionStatus::class.java
           )
         } else {
@@ -224,10 +224,10 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
       // Сохраняем Promise для обработки результата
       pendingPromise = promise
-      
+
       // Сбрасываем флаги для нового платежа
       isProcessingResult = false
-      
+
       // НОВОЕ: Очищаем предыдущие ошибки при начале нового платежа
       lastPaymentError = null
       lastPaymentErrorCode = null
@@ -273,16 +273,16 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
     if (isProcessingResult) {
       return
     }
-    
+
     isProcessingResult = true
-    
+
     val transactionStatus = getTransactionStatus(data)
     val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
     val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
-    
+
     // НОВОЕ: Проверяем, есть ли URL с информацией об ошибке (например, из 3D Secure)
     val dataString = data?.dataString
-    
+
     if (dataString != null && dataString.contains("threeds/fail")) {
       // Извлекаем информацию об ошибке из URL
       try {
@@ -290,33 +290,33 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
         val success = uri.getQueryParameter("Success")
         val reasonCodeFromUrl = uri.getQueryParameter("ReasonCode")
         val transactionIdFromUrl = uri.getQueryParameter("TransactionId")
-        
+
         if (success == "False" && reasonCodeFromUrl != null) {
           // Создаем фиктивный Intent с данными об ошибке
           val errorIntent = android.content.Intent().apply {
             putExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name, CloudpaymentsSDK.TransactionStatus.Failed)
             putExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, reasonCodeFromUrl.toIntOrNull() ?: 0)
-            transactionIdFromUrl?.toLongOrNull()?.let { 
+            transactionIdFromUrl?.toLongOrNull()?.let {
               putExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, it)
             }
           }
-          
+
           eventEmitter.sendFormWillHide()
           handleFailedPayment(errorIntent)
           eventEmitter.sendFormDidHide()
-          
+
           // Очищаем Promise и сбрасываем флаги
           pendingPromise = null
           isProcessingResult = false
           hasActivePaymentAttempt = false
-          
+
           return
         }
       } catch (e: Exception) {
         // Игнорируем ошибки парсинга URL
       }
     }
-    
+
     // Отправляем события
     eventEmitter.sendFormWillHide()
 
@@ -414,7 +414,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
   /**
    * Обработка неудачного платежа
-   * ВАЖНО: Promise НЕ resolve-ается здесь сразу! 
+   * ВАЖНО: Promise НЕ resolve-ается здесь сразу!
    * Promise будет resolve-ан в handleCancelledPayment() когда пользователь закроет форму
    */
   private fun handleFailedPayment(data: Intent?) {
@@ -450,7 +450,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private fun handleCancelledPayment() {
     // НОВОЕ: Анализируем время работы формы
     val paymentDuration = System.currentTimeMillis() - paymentStartTime
-    
+
     // УЛУЧШЕНО: Проверяем, была ли ошибка до закрытия формы
     if (lastPaymentError != null && lastPaymentErrorCode != null) {
       // Если была ошибка, отправляем событие ошибки, а не отмены
@@ -472,7 +472,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       // Предполагаем, что была ошибка 3D Secure
       val errorMessage = "3-D Secure авторизация не пройдена"
       val errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue
-      
+
       eventEmitter.sendTransactionError(
         message = errorMessage,
         errorCode = errorCode

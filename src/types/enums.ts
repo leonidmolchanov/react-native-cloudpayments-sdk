@@ -301,3 +301,101 @@ export enum EPaymentFormAction {
   /** Выполняется транзакция */
   TRANSACTION = 'transaction',
 }
+
+// ============================================================================
+// CARDIO ENUMS
+// ============================================================================
+
+/**
+ * Поддерживаемые языки интерфейса CardIO сканера
+ *
+ * @description Перечисление языков, поддерживаемых CardIO для локализации
+ * интерфейса сканера банковских карт. Если язык не указан, используется
+ * язык устройства по умолчанию.
+ *
+ * @example Использование языков CardIO
+ * ```typescript
+ * import { ECardIOLanguage } from '@lmapp/react-native-cloudpayments';
+ *
+ * const cardScannerConfig = {
+ *   language: ECardIOLanguage.RUSSIAN,
+ *   requireExpiry: true,
+ *   hideCardIOLogo: true
+ * };
+ * ```
+ *
+ * @since 1.0.0
+ * @platform android
+ */
+export enum ECardIOLanguage {
+  /** Английский язык */
+  ENGLISH = 'en',
+  /** Русский язык */
+  RUSSIAN = 'ru',
+  /** Французский язык */
+  FRENCH = 'fr',
+  /** Немецкий язык */
+  GERMAN = 'de',
+  /** Итальянский язык */
+  ITALIAN = 'it',
+  /** Японский язык */
+  JAPANESE = 'ja',
+  /** Корейский язык */
+  KOREAN = 'ko',
+  /** Португальский язык */
+  PORTUGUESE = 'pt',
+  /** Шведский язык */
+  SWEDISH = 'sv',
+  /** Китайский упрощенный */
+  CHINESE_SIMPLIFIED = 'zh-Hans',
+  /** Китайский традиционный */
+  CHINESE_TRADITIONAL = 'zh-Hant',
+  /** Испанский язык */
+  SPANISH = 'es',
+}
+
+/**
+ * Предустановленные цветовые схемы для CardIO сканера
+ *
+ * @description Перечисление готовых цветов в стиле Material Design
+ * для настройки внешнего вида CardIO сканера. Можно использовать
+ * как для цвета ActionBar, так и для цвета рамки сканирования.
+ *
+ * @example Использование цветовых схем
+ * ```typescript
+ * import { ECardIOColorScheme } from '@lmapp/react-native-cloudpayments';
+ *
+ * const cardScannerConfig = {
+ *   actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
+ *   guideColor: ECardIOColorScheme.MATERIAL_GREEN,
+ *   language: 'ru'
+ * };
+ * ```
+ *
+ * @since 1.0.0
+ * @platform android
+ */
+export enum ECardIOColorScheme {
+  /** Material Design синий цвет (#2196F3) */
+  MATERIAL_BLUE = '#2196F3',
+  /** Material Design зеленый цвет (#4CAF50) */
+  MATERIAL_GREEN = '#4CAF50',
+  /** Material Design красный цвет (#F44336) */
+  MATERIAL_RED = '#F44336',
+  /** Material Design оранжевый цвет (#FF9800) */
+  MATERIAL_ORANGE = '#FF9800',
+  /** Material Design фиолетовый цвет (#9C27B0) */
+  MATERIAL_PURPLE = '#9C27B0',
+  /** Material Design темно-синий цвет (#3F51B5) */
+  MATERIAL_INDIGO = '#3F51B5',
+  /** Material Design голубой цвет (#00BCD4) */
+  MATERIAL_CYAN = '#00BCD4',
+  /** Material Design розовый цвет (#E91E63) */
+  MATERIAL_PINK = '#E91E63',
+  /** Черный цвет */
+  BLACK = '#000000',
+  /** Белый цвет */
+  WHITE = '#FFFFFF',
+  /** Серый цвет */
+  GRAY = '#9E9E9E',
+}

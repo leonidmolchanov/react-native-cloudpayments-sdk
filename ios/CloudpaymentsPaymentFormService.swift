@@ -12,7 +12,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
     // Callbacks для React Native
     private var onPaymentSuccess: RCTResponseSenderBlock?
     private var onPaymentFailure: RCTResponseSenderBlock?
-    
+    var scanner: CloudpaymentsCardIOService?
     @objc public init(publicId: String, CPSDK: CloudpaymentsSdkImpl?) {
         self.CPSDK = CPSDK
         self.publicId = publicId
@@ -88,15 +88,15 @@ public class CloudpaymentsPaymentFormService: NSObject {
       let isRequireEmail = (paymentData[EPaymentConfigKeys.requireEmail.rawValue] as? Bool) ?? EDefaultValues.requireEmail
       let useDualMessagePayment = (paymentData[EPaymentConfigKeys.useDualMessagePayment.rawValue] as? Bool) ?? EDefaultValues.useDualMessagePayment
 
-        
-        // Определяем нужно ли отключать Apple Pay
-        
+      self.scanner = CloudpaymentsCardIOService(config: [:])
+
         // Создаем конфигурацию
         let configuration = PaymentConfiguration(
             publicId: publicId,
             paymentData: paymentObj,
             delegate: self,
             uiDelegate: self,
+            scanner:scanner,
             requireEmail: isRequireEmail,
             useDualMessagePayment: useDualMessagePayment,
             disableApplePay: isApplePayDisabled
@@ -206,4 +206,4 @@ extension CloudpaymentsPaymentFormService {
         onPaymentSuccess = nil
         onPaymentFailure = nil
     }
-} 
+}
