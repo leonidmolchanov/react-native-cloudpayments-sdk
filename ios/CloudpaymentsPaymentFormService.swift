@@ -4,11 +4,11 @@ import Cloudpayments
 
 @objc(CloudpaymentsPaymentFormService)
 public class CloudpaymentsPaymentFormService: NSObject {
-    
+
     private let CPSDK: CloudpaymentsSdkImpl?
     private let publicId: String
     private var currentPaymentForm: PaymentForm?
-    
+
     // Callbacks для React Native
     private var onPaymentSuccess: RCTResponseSenderBlock?
     private var onPaymentFailure: RCTResponseSenderBlock?
@@ -18,20 +18,20 @@ public class CloudpaymentsPaymentFormService: NSObject {
         self.publicId = publicId
         super.init()
     }
-    
+
     @objc public static func requiresMainQueueSetup() -> Bool {
         return false
     }
-    
+
     // MARK: - Public Methods for React Native
-    
+
     @objc(presentPaymentForm:resolve:reject:)
     public func presentPaymentForm(
         paymentData: [String: Any],
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
-      
+
         // Создаем callbacks для конвертации resolve/reject в RCTResponseSenderBlock
       let onSuccess: RCTResponseSenderBlock = { result in
           if let unwrappedResult = result, let resultDict = unwrappedResult.first as? [String: Any] {
@@ -51,7 +51,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
               reject(ECloudPaymentsError.paymentFailed.rawValue, EDefaultMessages.paymentFailed.rawValue, nil)
           }
       }
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.showPaymentForm(
                 paymentData:paymentData,
@@ -60,9 +60,9 @@ public class CloudpaymentsPaymentFormService: NSObject {
             )
         }
     }
-    
+
     // MARK: - Private Implementation
-    
+
     private func showPaymentForm(
         paymentData:[String: Any],
         onSuccess: @escaping RCTResponseSenderBlock,
@@ -76,11 +76,11 @@ public class CloudpaymentsPaymentFormService: NSObject {
       guard let paymentObj = PaymentData(from: paymentData) else {
           return
       }
-        
+
         // Сохраняем callbacks
         self.onPaymentSuccess = onSuccess
         self.onPaymentFailure = onFailure
-      
+
       if let applePayMerchantId = paymentData[EPaymentConfigKeys.applePayMerchantId.rawValue] as? String, !applePayMerchantId.isEmpty {
           paymentObj.setApplePayMerchantId(applePayMerchantId)
       }
@@ -88,7 +88,8 @@ public class CloudpaymentsPaymentFormService: NSObject {
       let isRequireEmail = (paymentData[EPaymentConfigKeys.requireEmail.rawValue] as? Bool) ?? EDefaultValues.requireEmail
       let useDualMessagePayment = (paymentData[EPaymentConfigKeys.useDualMessagePayment.rawValue] as? Bool) ?? EDefaultValues.useDualMessagePayment
 
-      self.scanner = CloudpaymentsCardIOService(config: [:])
+      let isUseScanner = (paymentData[EPaymentConfigKeys.enableCardScanner.rawValue] as? Bool) ?? false
+      self.scanner = isUseScanner ? CloudpaymentsCardIOService(config: [:]) : nil
 
         // Создаем конфигурацию
         let configuration = PaymentConfiguration(
@@ -101,22 +102,22 @@ public class CloudpaymentsPaymentFormService: NSObject {
             useDualMessagePayment: useDualMessagePayment,
             disableApplePay: isApplePayDisabled
         )
-        
+
         // Показываем форму
         currentPaymentForm = PaymentForm.present(with: configuration, from: topViewController)
     }
-    
+
     private func getTopViewController() -> UIViewController? {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
             return nil
         }
-        
+
         var topController = window.rootViewController
         while let presentedController = topController?.presentedViewController {
             topController = presentedController
         }
-        
+
         return topController
     }
 }
@@ -124,7 +125,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
 // MARK: - PaymentDelegate
 
 extension CloudpaymentsPaymentFormService: PaymentDelegate {
-    
+
     public func onPaymentFinished(_ transactionId: Int64?) {
         DispatchQueue.main.async { [weak self] in
             let result: [String: Any] = [
@@ -141,7 +142,7 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
             self?.cleanup()
         }
     }
-    
+
     public func onPaymentFailed(_ errorMessage: String?) {
         DispatchQueue.main.async { [weak self] in
             let error = errorMessage ?? EDefaultMessages.paymentFailed.rawValue
@@ -154,7 +155,7 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
             self?.cleanup()
         }
     }
-    
+
     public func paymentFinishedIntentApi(_ transaction: Int64?) {
         DispatchQueue.main.async { [weak self] in
             let result: [String: Any] = [
@@ -171,25 +172,25 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
             self?.cleanup()
         }
     }
-  
+
 }
 
 // MARK: - PaymentUIDelegate
 
 extension CloudpaymentsPaymentFormService: PaymentUIDelegate {
-    
+
     public func paymentFormWillDisplay() {
       CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [EPaymentFormAction.action.rawValue: EPaymentFormEvent.willDisplay.rawValue])
     }
-    
+
     public func paymentFormDidDisplay() {
       CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [EPaymentFormAction.action.rawValue: EPaymentFormEvent.didDisplay.rawValue])
     }
-    
+
     public func paymentFormWillHide() {
       CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [EPaymentFormAction.action.rawValue: EPaymentFormEvent.willHide.rawValue])
     }
-    
+
     public func paymentFormDidHide() {
       CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [EPaymentFormAction.action.rawValue: EPaymentFormEvent.didHide.rawValue])
         cleanup()
@@ -200,7 +201,7 @@ extension CloudpaymentsPaymentFormService: PaymentUIDelegate {
 // MARK: - Helper Methods
 
 extension CloudpaymentsPaymentFormService {
-    
+
     private func cleanup() {
         currentPaymentForm = nil
         onPaymentSuccess = nil

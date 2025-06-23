@@ -44,6 +44,8 @@ enum EPaymentConfigKeys: String, CaseIterable {
     case failRedirectUrl = "failRedirectUrl"
     case saveCardSinglePaymentMode = "saveCardSinglePaymentMode"
     case showResultScreen = "showResultScreen"
+    case enableCardScanner = "enableCardScanner"
+
 }
 
 // MARK: - Payment Methods
