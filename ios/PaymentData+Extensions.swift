@@ -95,11 +95,19 @@ extension PaymentData {
 
             setRecurrent(recurrent)
         }
-   
+        if let jsonData = input["jsonData"] {
+           do {
+               let data = try JSONSerialization.data(withJSONObject: jsonData, options: [])
+                let jsonString = String(data: data, encoding: .utf8)
+                 setJsonData(jsonString ?? "")
+               } catch {
+                        print("❌ Ошибка сериализации jsonData: \(error.localizedDescription)")
+                        }
+               } else {
+               }
         setCultureName(input["cultureName"] as? String ?? "RU-ru")
         setDescription(input["description"] as? String)
         setEmail(input["email"] as? String)
         setAccountId(input["accountId"] as? String)
-        setJsonData(input["jsonData"] as? String ?? "")
     }
 }
