@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.9](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.8...v0.1.9) (2025-06-23)
+
+
+### ✨ Новые возможности
+
+* CardIO support  ([85a2211](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/85a221125503a073d57dacd21f3cabcf2b758461))
+
+
+### 🐛 Исправления
+
+* eslint ([ba25dc6](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/ba25dc6e85da022322cff8351259c780072b9e8d))
+* json-data-ios ([#13](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/issues/13)) ([f89ffcc](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/f89ffcc2fe3577001bf410fec991d68ee87814eb))
+
 ### [0.1.8](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.7...v0.1.8) (2025-06-19)
 
 
