@@ -7,7 +7,7 @@ extension PaymentData {
             let amount = input["amount"] as? String,
             let currency = input["currency"] as? String
         else {
-    
+
             return nil
         }
 
@@ -31,7 +31,7 @@ extension PaymentData {
             )
             setPayer(payer)
         }
-      
+
 
         if let receiptDict = input["receipt"] as? [String: Any],
            let itemsArray = receiptDict["items"] as? [[String: Any]] {
@@ -79,22 +79,65 @@ extension PaymentData {
             setReceipt(receipt)
         }
 
-              if let recurrentDict = input["recurrent"] as? [String: Any],
-           let interval = recurrentDict["interval"] as? String,
-           let period = recurrentDict["period"] as? Int,
-           let amount = recurrentDict["amount"] as? Double {
+        if let recurrentDict = input["recurrent"] as? [String: Any] {
+            let interval = recurrentDict["interval"] as? String ?? "Month"
+            let period   = recurrentDict["period"] as? Int ?? 1
 
-            let recurrentReceipt: Receipt? = nil // Опционально, если нужно заполнить, добавь обработку
+            func parseAmount(_ any: Any?) -> Decimal? {
+                switch any {
+                case let n as NSNumber:
+                    return Decimal(string: n.stringValue)
+                case let d as Double:
+                    return Decimal(d)
+                case let s as String:
+                    // заменим запятую на точку на всякий случай
+                    return Decimal(string: s.replacingOccurrences(of: ",", with: "."))
+                default:
+                    return nil
+                }
+            }
+
+            var amount: Decimal?
+
+            // 1) recurrent.amount (если вдруг есть)
+            amount = parseAmount(recurrentDict["amount"])
+
+            // 2) customerReceipt.amounts.electronic
+            if amount == nil,
+               let receipt = recurrentDict["customerReceipt"] as? [String: Any],
+               let amounts = receipt["amounts"] as? [String: Any] {
+                amount = parseAmount(amounts["electronic"])
+            }
+
+            // 3) сумма по items (amount или price)
+            if amount == nil,
+               let receipt = recurrentDict["customerReceipt"] as? [String: Any],
+               let items = receipt["items"] as? [[String: Any]] {
+                amount = items.reduce(Decimal(0)) { acc, it in
+                    let a = parseAmount(it["amount"]) ?? parseAmount(it["price"]) ?? 0
+                    return acc + a
+                }
+            }
+
+            guard let decimalAmount = amount else {
+                print("❌ Не удалось распарсить сумму из recurrent")
+                return
+            }
+
+            // В копейки с округлением
+            let minor = (decimalAmount * 100 as NSDecimalNumber).rounding(accordingToBehavior: nil).intValue
 
             let recurrent = Recurrent(
                 interval: interval,
                 period: period,
-                customerReceipt: recurrentReceipt,
-                amount: Int(amount)
+                customerReceipt: nil, // заполни при необходимости
+                amount: minor
             )
 
             setRecurrent(recurrent)
         }
+
+
         if let jsonData = input["jsonData"] {
            do {
                let data = try JSONSerialization.data(withJSONObject: jsonData, options: [])
