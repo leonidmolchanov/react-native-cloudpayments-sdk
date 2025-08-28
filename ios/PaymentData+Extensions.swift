@@ -125,7 +125,7 @@ extension PaymentData {
             }
 
             // В копейки с округлением
-            let minor = (decimalAmount * 100 as NSDecimalNumber).rounding(accordingToBehavior: nil).intValue
+            let minor = (decimalAmount as NSDecimalNumber).rounding(accordingToBehavior: nil).intValue
 
             let recurrent = Recurrent(
                 interval: interval,
