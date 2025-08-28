@@ -129,7 +129,7 @@ extension PaymentData {
             let recurrent = Recurrent(
                 interval: interval,
                 period: period,
-                customerReceipt: nil, // заполни при необходимости
+                customerReceipt: nil,
                 amount: minor
             )
 
