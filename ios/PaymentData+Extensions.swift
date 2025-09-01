@@ -124,14 +124,11 @@ extension PaymentData {
                 return
             }
 
-            // ✅ Конвертация в Float без округлений
-            let floatAmount = (decimalAmount as NSDecimalNumber).floatValue
-
             let recurrent = Recurrent(
                 interval: interval,
                 period: period,
                 customerReceipt: nil,
-                amount: floatAmount
+                amount: decimalAmount
             )
 
             setRecurrent(recurrent)
