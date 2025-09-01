@@ -124,13 +124,14 @@ extension PaymentData {
                 return
             }
 
-            let minor = (decimalAmount as NSDecimalNumber).rounding(accordingToBehavior: nil).intValue
+            // ✅ Конвертация в Float без округлений
+            let floatAmount = (decimalAmount as NSDecimalNumber).floatValue
 
             let recurrent = Recurrent(
                 interval: interval,
                 period: period,
                 customerReceipt: nil,
-                amount: minor
+                amount: floatAmount
             )
 
             setRecurrent(recurrent)
