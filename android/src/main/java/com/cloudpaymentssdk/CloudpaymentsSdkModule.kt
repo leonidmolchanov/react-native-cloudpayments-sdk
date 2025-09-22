@@ -251,7 +251,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
   // ActivityEventListener методы
   override fun onActivityResult(
-    activity: Activity?,
+    activity: Activity,
     requestCode: Int,
     resultCode: Int,
     data: Intent?
@@ -261,7 +261,7 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  override fun onNewIntent(intent: Intent?) {
+  override fun onNewIntent(intent: Intent) {
   }
 
   /**
