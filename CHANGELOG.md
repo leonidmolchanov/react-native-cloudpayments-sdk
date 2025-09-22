@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.16](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.15...v0.1.16) (2025-09-22)
+
+
+### 🐛 Исправления
+
+* redirect url ([#21](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/issues/21)) ([f652997](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/commit/f65299763c12bab80f02102d0ced10aa2f6fc85b))
+
 ### [0.1.15](https://github.com/leonidmolchanov/react-native-cloudpayments-sdk/compare/v0.1.14...v0.1.15) (2025-09-01)
 
 
