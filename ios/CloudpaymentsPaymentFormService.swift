@@ -91,6 +91,10 @@ public class CloudpaymentsPaymentFormService: NSObject {
       let isUseScanner = (paymentData[EPaymentConfigKeys.enableCardScanner.rawValue] as? Bool) ?? false
       self.scanner = isUseScanner ? CloudpaymentsCardIOService(config: [:]) : nil
 
+
+        let successRedirectUrl = (paymentData[EPaymentConfigKeys.successRedirectUrl.rawValue] as? String) ?? nil
+        let failRedirectUrl = (paymentData[EPaymentConfigKeys.failRedirectUrl.rawValue] as? String) ?? nil
+
         // Создаем конфигурацию
         let configuration = PaymentConfiguration(
             publicId: publicId,
@@ -100,7 +104,9 @@ public class CloudpaymentsPaymentFormService: NSObject {
             scanner:scanner,
             requireEmail: isRequireEmail,
             useDualMessagePayment: useDualMessagePayment,
-            disableApplePay: isApplePayDisabled
+            disableApplePay: isApplePayDisabled,
+            successRedirectUrl: successRedirectUrl,
+            failRedirectUrl: failRedirectUrl
         )
 
         // Показываем форму
