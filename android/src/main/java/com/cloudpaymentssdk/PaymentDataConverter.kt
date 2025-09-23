@@ -147,6 +147,11 @@ object PaymentDataConverter {
         if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
           val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
           val receiptJson = JSONObject(readableMapToJson(receiptMap))
+          // Приводим ключи к ожидаемому формату API: items -> Items
+          if (receiptJson.has("items") && !receiptJson.has("Items")) {
+            receiptJson.put("Items", receiptJson.getJSONArray("items"))
+            receiptJson.remove("items")
+          }
 
           val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
             jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
@@ -162,6 +167,16 @@ object PaymentDataConverter {
         if (paymentDataMap.hasKey(EPaymentConfigKeys.RECURRENT.rawValue)) {
           val recurrentMap = paymentDataMap.getMap(EPaymentConfigKeys.RECURRENT.rawValue)
           val recurrentJson = JSONObject(readableMapToJson(recurrentMap))
+          // customerReceipt -> CustomerReceipt и внутри него items -> Items
+          if (recurrentJson.has("customerReceipt")) {
+            val cr = recurrentJson.getJSONObject("customerReceipt")
+            if (cr.has("items") && !cr.has("Items")) {
+              cr.put("Items", cr.getJSONArray("items"))
+              cr.remove("items")
+            }
+            recurrentJson.put("CustomerReceipt", cr)
+            recurrentJson.remove("customerReceipt")
+          }
 
           val cloudPaymentsJson = if (jsonDataObject.has(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)) {
             jsonDataObject.getJSONObject(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue)
