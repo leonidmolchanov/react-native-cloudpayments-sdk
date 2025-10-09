@@ -2,6 +2,58 @@ import Foundation
 import Cloudpayments
 
 extension PaymentData {
+
+    private func asDecimal(_ v: Any?) -> Decimal? {
+        switch v {
+        case let d as Decimal:
+            return d
+        case let n as NSDecimalNumber:
+            // уже Decimal-представление — самый надёжный путь
+            return n.decimalValue
+        case let n as NSNumber:
+            // избегаем Double → String → Decimal; берём через NSDecimalNumber
+            return NSDecimalNumber(decimal: n.decimalValue).decimalValue
+        case let s as String:
+            // поддержим обе разделительные: "," и "."
+            let normalized = s.replacingOccurrences(of: ",", with: ".")
+            return Decimal(string: normalized, locale: Locale(identifier: "en_US_POSIX"))
+        case let d as Double:
+            // если всё же пришёл Double — аккуратно завернём
+            return Decimal(string: String(d), locale: Locale(identifier: "en_US_POSIX"))
+        case let f as Float:
+            return Decimal(string: String(f), locale: Locale(identifier: "en_US_POSIX"))
+        default:
+            return nil
+        }
+    }
+
+    private func asDouble(_ v: Any?) -> Double? {
+        if let d = v as? Double { return d }
+        if let n = v as? NSNumber { return n.doubleValue }
+        if let s = v as? String { return Double(s.replacingOccurrences(of: ",", with: ".")) }
+        return nil
+    }
+
+    private func asInt(_ v: Any?) -> Int? {
+        if let i = v as? Int { return i }
+        if let n = v as? NSNumber { return n.intValue }
+        if let s = v as? String { return Int(s) }
+        return nil
+    }
+
+    private func asBool(_ v: Any?) -> Bool {
+        if let b = v as? Bool { return b }
+        if let n = v as? NSNumber { return n.boolValue }
+        if let s = v as? String { return ["1","true","yes"].contains(s.lowercased()) }
+        return false
+    }
+    private func decToDouble(_ d: Decimal?) -> Double? {
+        guard let d else { return nil }
+        return NSDecimalNumber(decimal: d).doubleValue
+    }
+
+    private func asString(_ v: Any?) -> String { (v as? String) ?? "" }
+
     convenience init?(from input: [String: Any]) {
         guard
             let amount = input["amount"] as? String,
@@ -10,6 +62,9 @@ extension PaymentData {
 
             return nil
         }
+
+
+
 
         self.init()
 
@@ -33,46 +88,55 @@ extension PaymentData {
         }
 
 
-        if let receiptDict = input["receipt"] as? [String: Any],
-           let itemsArray = receiptDict["items"] as? [[String: Any]] {
-          let items = itemsArray.compactMap { (itemDict: [String: Any]) -> Receipt.Item? in
-              guard
-                  let label = itemDict["label"] as? String,
-                  let price = itemDict["price"] as? Double,
-                  let quantity = itemDict["quantity"] as? Double,
-                  let amount = itemDict["amount"] as? Double,
-                  let vat = itemDict["vat"] as? Int,
-                  let method = itemDict["method"] as? Int,
-                  let object = itemDict["object"] as? Int
-              else {
-                  return nil
-              }
+        if let receiptDict = input["receipt"] as? [String: Any] {
 
-              return Receipt.Item(
-                  label: label,
-                  price: price,
-                  quantity: quantity,
-                  amount: amount,
-                  vat: vat,
-                  method: method,
-                  object: object
-              )
-          }
+            // items
+            let itemsArray = (receiptDict["items"] as? [[String: Any]]) ?? []
+            let items: [Receipt.Item] = itemsArray.compactMap { itemDict in
+                guard
+                    let label    = itemDict["label"] as? String,
+                    let price    = asDecimal(itemDict["price"]),
+                    let quantity = asDouble(itemDict["quantity"]),
+                    let amount   = asDecimal(itemDict["amount"])
+                else {
+                    // print("Skip item: \(itemDict)")
+                    return nil
+                }
 
-            let amountsDict = receiptDict["amounts"] as? [String: Double] ?? [:]
+                // vat может быть null/отсутствовать → ставим 0 (или сделай поле опциональным в модели)
+                let vat    = asInt(itemDict["vat"]) ?? 0
+                let method = asInt(itemDict["method"]) ?? 0
+                let object = asInt(itemDict["object"]) ?? 0
+
+                return Receipt.Item(
+                    label: label,
+                    price: price,
+                    quantity: quantity,
+                    amount: amount,
+                    vat: vat,
+                    method: method,
+                    object: object
+                )
+            }
+
+            // amounts
+            let amountsAny = receiptDict["amounts"] as? [String: Any]
             let amounts = Receipt.Amounts(
-                electronic: amountsDict["electronic"] ?? 0,
-                advancePayment: amountsDict["advancePayment"] ?? 0,
-                credit: amountsDict["credit"] ?? 0,
-                provision: amountsDict["provision"] ?? 0
+                electronic:     asDouble(amountsAny?["electronic"])     ?? 0,
+                advancePayment: asDouble(amountsAny?["advancePayment"]) ?? 0,
+                credit:         asDouble(amountsAny?["credit"])         ?? 0,
+                provision:      asDouble(amountsAny?["provision"])      ?? 0
             )
 
+            print("receiptDict items \(items.count)")
+
+            // итоговый receipt
             let receipt = Receipt(
                 items: items,
-                taxationSystem: receiptDict["taxationSystem"] as? Int ?? 0,
-                email: receiptDict["email"] as? String ?? "",
-                phone: receiptDict["phone"] as? String ?? "",
-                isBso: receiptDict["isBso"] as? Bool ?? false,
+                taxationSystem: asInt(receiptDict["taxationSystem"]) ?? 0,
+                email: asString(receiptDict["email"]),
+                phone: asString(receiptDict["phone"]),
+                isBso: asBool(receiptDict["isBso"]),
                 amounts: amounts
             )
 
