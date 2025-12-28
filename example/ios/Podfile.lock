@@ -1,9 +1,9 @@
 PODS:
   - boost (1.84.0)
-  - Cloudpayments (1.6.0):
+  - Cloudpayments (2.1.0):
     - CloudpaymentsNetworking
   - CloudpaymentsNetworking (1.0.2)
-  - CloudpaymentsSdk (0.1.8):
+  - CloudpaymentsSdk (0.1.17):
     - Cloudpayments
     - CloudpaymentsNetworking
     - DoubleConversion
@@ -1688,8 +1688,8 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
-  - Cloudpayments (from `https://github.com/leonidmolchanov/cloudpayments-ios-sdk`, branch `master`)
-  - CloudpaymentsNetworking (from `https://github.com/leonidmolchanov/cloudpayments-ios-sdk`, branch `master`)
+  - Cloudpayments (from `https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios`, branch `master`)
+  - CloudpaymentsNetworking (from `https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios`, branch `master`)
   - CloudpaymentsSdk (from `../..`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
@@ -1772,10 +1772,10 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   Cloudpayments:
     :branch: master
-    :git: https://github.com/leonidmolchanov/cloudpayments-ios-sdk
+    :git: https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios
   CloudpaymentsNetworking:
     :branch: master
-    :git: https://github.com/leonidmolchanov/cloudpayments-ios-sdk
+    :git: https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios
   CloudpaymentsSdk:
     :path: "../.."
   DoubleConversion:
@@ -1920,17 +1920,17 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Cloudpayments:
-    :commit: 24b945186f2f143bce358d2afb0c7ec0be2e465d
-    :git: https://github.com/leonidmolchanov/cloudpayments-ios-sdk
+    :commit: 619b9498da1a1e83b9e96b5b2507876d7c8d99f1
+    :git: https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios
   CloudpaymentsNetworking:
-    :commit: 24b945186f2f143bce358d2afb0c7ec0be2e465d
-    :git: https://github.com/leonidmolchanov/cloudpayments-ios-sdk
+    :commit: 619b9498da1a1e83b9e96b5b2507876d7c8d99f1
+    :git: https://gitpub.cloudpayments.ru/integrations/sdk/cloudpayments-ios
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  Cloudpayments: 7e37f89de6293457d8ae7d25d2762da3394ac7b4
-  CloudpaymentsNetworking: 8d7f72b94360dcf3846ac10d9c479ec7a57f19b8
-  CloudpaymentsSdk: 5cb3968f53cf5a9d2a190e287699626ec867ffeb
+  Cloudpayments: daefdbf8495d43bec857e0687c08475d8402b890
+  CloudpaymentsNetworking: dc47cdd309c0c209fe65e9b6c3e7ff2b64d8d418
+  CloudpaymentsSdk: 617d7dcbc1714bbb68fc268f9aeb9f34573ee34b
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
@@ -2002,6 +2002,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 9f110fc4b7aa538663cba3c14cbb1c335f43c13f
 
-PODFILE CHECKSUM: 6d8580145ac184a259dbb5a74aa1220fb66d9c2c
+PODFILE CHECKSUM: 2ca9f310efbf082e4f2f3360554f9e03c2b703cb
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

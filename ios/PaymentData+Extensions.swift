@@ -68,8 +68,8 @@ extension PaymentData {
 
         self.init()
 
-        setAmount(amount)
-        setCurrency(currency)
+        _ = setAmount(amount)
+        _ = setCurrency(currency)
 
         if let payerDict = input["payer"] as? [String: Any] {
             let payer = PaymentDataPayer(
@@ -84,7 +84,7 @@ extension PaymentData {
                 phone: payerDict["phone"] as? String ?? "",
                 postcode: payerDict["postcode"] as? String ?? ""
             )
-            setPayer(payer)
+            _ = setPayer(payer)
         }
 
 
@@ -92,16 +92,20 @@ extension PaymentData {
 
             // items
             let itemsArray = (receiptDict["items"] as? [[String: Any]]) ?? []
-            let items: [Receipt.Item] = itemsArray.compactMap { itemDict in
+            let items: [Receipt.Item] = itemsArray.compactMap { itemDict -> Receipt.Item? in
                 guard
                     let label    = itemDict["label"] as? String,
-                    let price    = asDecimal(itemDict["price"]),
+                    let priceDecimal = asDecimal(itemDict["price"]),
                     let quantity = asDouble(itemDict["quantity"]),
-                    let amount   = asDecimal(itemDict["amount"])
+                    let amountDecimal = asDecimal(itemDict["amount"])
                 else {
                     // print("Skip item: \(itemDict)")
                     return nil
                 }
+
+                // Конвертируем Decimal в Double для SDK 2.1.0
+                let price = NSDecimalNumber(decimal: priceDecimal).doubleValue
+                let amount = NSDecimalNumber(decimal: amountDecimal).doubleValue
 
                 // vat может быть null/отсутствовать → ставим 0 (или сделай поле опциональным в модели)
                 let vat    = asInt(itemDict["vat"]) ?? 0
@@ -140,7 +144,7 @@ extension PaymentData {
                 amounts: amounts
             )
 
-            setReceipt(receipt)
+            _ = setReceipt(receipt)
         }
 
         if let recurrentDict = input["recurrent"] as? [String: Any] {
@@ -188,14 +192,17 @@ extension PaymentData {
                 return
             }
 
+            // В SDK 2.1.0 Recurrent.amount имеет тип Double?, а не Decimal
+            let amountDouble = NSDecimalNumber(decimal: decimalAmount).doubleValue
+
             let recurrent = Recurrent(
                 interval: interval,
                 period: period,
                 customerReceipt: nil,
-                amount: decimalAmount
+                amount: amountDouble
             )
 
-            setRecurrent(recurrent)
+            _ = setRecurrent(recurrent)
         }
 
 
@@ -203,15 +210,14 @@ extension PaymentData {
            do {
                let data = try JSONSerialization.data(withJSONObject: jsonData, options: [])
                 let jsonString = String(data: data, encoding: .utf8)
-                 setJsonData(jsonString ?? "")
+                _ = setJsonData(jsonString ?? "")
                } catch {
                         print("❌ Ошибка сериализации jsonData: \(error.localizedDescription)")
                         }
-               } else {
                }
-        setCultureName(input["cultureName"] as? String ?? "RU-ru")
-        setDescription(input["description"] as? String)
-        setEmail(input["email"] as? String)
-        setAccountId(input["accountId"] as? String)
+        // setCultureName не существует в SDK 2.1.0 - удалено
+        _ = setDescription(input["description"] as? String)
+        _ = setEmail(input["email"] as? String)
+        _ = setAccountId(input["accountId"] as? String)
     }
 }
