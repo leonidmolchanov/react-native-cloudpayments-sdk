@@ -29,7 +29,7 @@ public class CloudpaymentsPaymentService: NSObject {
 
     // Получаем paymentMethodSequence из paymentData или используем пустой массив
     let paymentMethodSequenceStrings = (paymentData["paymentMethodSequence"] as? [String]) ?? []
-    
+
     CloudpaymentsApi.createIntent(with: configuration, paymentMethodSequence: paymentMethodSequenceStrings) { response in
         if let response = response {
           self.storeIntentResponse(response)
@@ -44,13 +44,13 @@ public class CloudpaymentsPaymentService: NSObject {
   public func getTPayLink(puid: String, paymentData: [String: Any],
                    resolve: @escaping RCTPromiseResolveBlock,
                    reject: @escaping RCTPromiseRejectBlock) {
-    
+
     guard let configuration = createPaymentConfiguration(from: paymentData) else {
         reject("CONFIGURATION_ERROR", "Invalid payment configuration", nil)
         return
     }
-    
-    
+
+
     CloudpaymentsApi.getTPayLinkIntentApi(puid: puid, configuration: configuration) { statusCode, link in
       guard let link = link else {
         reject("TPAY_LINK_ERROR", "Failed to get TPay link", nil)
@@ -68,7 +68,7 @@ public class CloudpaymentsPaymentService: NSObject {
         reject("CONFIGURATION_ERROR", "Invalid payment configuration", nil)
         return
     }
-    
+
     CloudpaymentsApi.getSbpLinkIntentApi(puid: puid, schema: schema, configuration: configuration) { statusCode, link in
       guard let link = link else {
         reject("SBP_LINK_ERROR", "Failed to get SBP link", nil)
@@ -86,7 +86,7 @@ public class CloudpaymentsPaymentService: NSObject {
         reject("CONFIGURATION_ERROR", "Invalid payment configuration", nil)
         return
     }
-    
+
     CloudpaymentsApi.getSberPayLinkIntentApi(puid: puid, configuration: configuration) { statusCode, response in
       guard let response = response else {
         reject("SBERPAY_LINK_ERROR", "Failed to get SberPay link", nil)
@@ -116,7 +116,7 @@ public class CloudpaymentsPaymentService: NSObject {
         reject("CONFIGURATION_ERROR", "Invalid payment configuration", nil)
         return
     }
-    
+
     let paymentMethodType: PaymentMethodType
     switch type.lowercased() {
     case "tpay", "tinkoffpay":
@@ -129,7 +129,7 @@ public class CloudpaymentsPaymentService: NSObject {
         reject("INVALID_PAYMENT_TYPE", "Unsupported payment type provided", nil)
         return
     }
-    
+
     CloudpaymentsApi.getIntentWaitStatus(configuration, type: paymentMethodType) { statusCode in
       guard let statusCode = statusCode else {
         reject("INTENT_WAIT_STATUS_ERROR", "Failed to get intent wait status", nil)
@@ -138,7 +138,7 @@ public class CloudpaymentsPaymentService: NSObject {
       resolve(statusCode)
     }
   }
-  
+
   @objc(getPublicKey:reject:)
   public func getPublicKey(resolve: @escaping RCTPromiseResolveBlock,
                            reject: @escaping RCTPromiseRejectBlock) {
@@ -161,7 +161,7 @@ public class CloudpaymentsPaymentService: NSObject {
           }
       }
   }
-  
+
 
   @objc(intentPatchById:patches:resolve:reject:)
   public func intentPatchById(paymentData: [String: Any], patches: [[String: Any]],
@@ -171,7 +171,7 @@ public class CloudpaymentsPaymentService: NSObject {
         reject("CONFIGURATION_ERROR", "Invalid payment configuration", nil)
         return
     }
-    
+
     CloudpaymentsApi.intentPatchById(configuration: configuration, patches: patches) { response in
       guard let response = response else {
         reject("PATCH_INTENT_ERROR", "Failed to patch intent", nil)
@@ -180,7 +180,7 @@ public class CloudpaymentsPaymentService: NSObject {
       resolve(response.toDictionary())
     }
   }
-  
+
   @objc(createIntentPay:cardCryptogram:intentId:resolve:reject:)
   public func createIntentPay(paymentData: NSDictionary, cardCryptogram: String,
                               intentId: String,
@@ -196,19 +196,19 @@ public class CloudpaymentsPaymentService: NSObject {
       )
   }
 
-  
-  
+
+
   private func createPaymentConfiguration(from paymentData: [String: Any]) -> PaymentConfiguration? {
       guard let publicId = paymentData["publicId"] as? String,
             let paymentDataObj = self.createPaymentData(from: paymentData) else {
-  
+
           return nil
       }
 
       // Преобразуем requireEmail в emailBehavior
       let isRequireEmail = (paymentData["requireEmail"] as? Bool) ?? false
       var emailBehavior: EmailBehaviorType = isRequireEmail ? .required : .optional
-      
+
       // Если передан emailBehavior напрямую
       if let emailBehaviorString = paymentData["emailBehavior"] as? String {
           switch emailBehaviorString.lowercased() {
@@ -220,7 +220,7 @@ public class CloudpaymentsPaymentService: NSObject {
               emailBehavior = .optional
           }
       }
-      
+
       // Парсим paymentMethodSequence (обязательный параметр, не опциональный)
       var paymentMethodSequence: [PaymentMethodType] = []
       if let sequenceArray = paymentData["paymentMethodSequence"] as? [String] {
@@ -280,70 +280,12 @@ public class CloudpaymentsPaymentService: NSObject {
           failRedirectUrl: paymentData["failRedirectUrl"] as? String
       )
   }
-  
-  
+
+
   private func createPaymentData(from input: [String: Any]) -> PaymentData? {
-      guard let amount = input["amount"] as? String,
-            let currency = input["currency"] as? String else {
-          return nil
-      }
-    
-    let item = Receipt.Item(
-                label: "test",
-                price: 300.0,
-                quantity: 3.0,
-                amount: 900.0,
-                vat: 20,
-                method: 0,
-                object: 0)
-    
-    let receipt = Receipt(
-                items: [item],
-                taxationSystem: 0,
-                email: "test@test.ru",
-                phone: "+79991112233",
-                isBso: false,
-                amounts: Receipt.Amounts(
-                    electronic: 900.0,
-                    advancePayment: 0.0,
-                    credit: 0.0,
-                    provision: 0.0))
-    let recurrent = Recurrent(
-                interval: "Month",
-                period: 1,
-                customerReceipt: receipt,
-                amount: 100)
-
-    let payer = PaymentDataPayer(firstName: "Test", lastName: "Testov", middleName: "Testovich", birth: "1955-02-22", address: "home 6", street: "Testovaya", city: "Moscow", country: "RU", phone: "89991234567", postcode: "12345")
-
-
-      let paymentData = PaymentData()
-          .setAmount(amount)
-          .setCurrency(currency)
-          .setPayer(payer)
-          .setReceipt(receipt) // Данные для чека
-        .setRecurrent(recurrent) // Данные для подписки
-    
-
-      if let description = input["description"] as? String {
-          paymentData.setDescription(description)
-      }
-
-      if let email = input["email"] as? String {
-          paymentData.setEmail(email)
-      }
-
-      if let accountId = input["accountId"] as? String {
-          paymentData.setAccountId(accountId)
-      }
-
-      if let jsonData = input["jsonData"] as? String {
-          paymentData.setJsonData(jsonData)
-      }
-
-      return paymentData
+    return PaymentData(from: input)
   }
-  
+
   private func storeIntentResponse(_ response: PaymentIntentResponse) {
       if let intentId = response.publicIntentId {
           intentResponses[intentId] = response
@@ -352,8 +294,8 @@ public class CloudpaymentsPaymentService: NSObject {
   private func intentResponse(for intentId: String) -> PaymentIntentResponse? {
       return intentResponses[intentId]
   }
-  
-  
+
+
 }
 
 extension PaymentIntentResponse {
