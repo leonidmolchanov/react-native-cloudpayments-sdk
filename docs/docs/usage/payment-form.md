@@ -60,8 +60,20 @@ interface IPaymentData {
   /** Email плательщика */
   email?: string;
 
-  /** Обязательность ввода email */
+  /** Обязательность ввода email (deprecated - используйте emailBehavior) */
   requireEmail?: boolean;
+
+  /** Поведение поля email (SDK 2.1.0+) */
+  emailBehavior?: EEmailBehavior;
+
+  /** Порядок отображения способов оплаты (SDK 2.1.0+) */
+  paymentMethodSequence?: EPaymentMethod[];
+
+  /** Режим одного способа оплаты (SDK 2.1.0+) */
+  singlePaymentMode?: EPaymentMethod;
+
+  /** Показывать экран результата в режиме одного способа оплаты (SDK 2.1.0+) */
+  showResultScreenForSinglePaymentMode?: boolean;
 
   /** Номер счета/заказа */
   invoiceId?: string;
@@ -69,17 +81,8 @@ interface IPaymentData {
   /** Дополнительные данные */
   jsonData?: Record<string, any>;
 
-  /** Показывать экран результата */
-  showResultScreen?: boolean;
-
   /** Apple Pay Merchant ID */
   applePayMerchantId?: string;
-
-  /** Показывать кнопку Apple Pay */
-  showApplePay?: boolean;
-
-  /** Показывать кнопку Google Pay */
-  showGooglePay?: boolean;
 
   /** Информация о плательщике */
   payer?: IPayer;
@@ -301,14 +304,16 @@ const basicPayment = async () => {
 ### 2. Платеж с email
 
 ```typescript
+import { EEmailBehavior } from '@lmapp/react-native-cloudpayments';
+
 const paymentWithEmail = async () => {
   const result = await presentPaymentForm({
     amount: '2500.00',
     currency: 'RUB',
     description: 'Подписка Premium',
     email: 'user@example.com',
-    requireEmail: true, // Email обязателен
-    showResultScreen: true, // Показать экран результата
+    emailBehavior: EEmailBehavior.REQUIRED, // Email обязателен (SDK 2.1.0+)
+    showResultScreenForSinglePaymentMode: true, // Показать экран результата
   });
 };
 ```
@@ -339,14 +344,66 @@ const paymentWithMetadata = async () => {
 ### 4. Платеж с Apple Pay
 
 ```typescript
+import { EEmailBehavior } from '@lmapp/react-native-cloudpayments';
+
 const applePayPayment = async () => {
   const result = await presentPaymentForm({
     amount: '3000.00',
     currency: 'RUB',
     description: 'Покупка в магазине',
     applePayMerchantId: 'merchant.com.yourcompany.yourapp',
-    showApplePay: true,
     email: 'user@example.com',
+    emailBehavior: EEmailBehavior.OPTIONAL, // Email опционален
+  });
+};
+```
+
+### 5. Платеж в режиме одного способа оплаты (SDK 2.1.0+)
+
+```typescript
+import { EPaymentMethod, EEmailBehavior } from '@lmapp/react-native-cloudpayments';
+
+// Прямой запуск оплаты через TPay (без экрана выбора способов оплаты)
+const tpayPayment = async () => {
+  const result = await presentPaymentForm({
+    amount: '2000.00',
+    currency: 'RUB',
+    description: 'Оплата через TPay',
+    singlePaymentMode: EPaymentMethod.TPAY, // Прямой запуск TPay
+    showResultScreenForSinglePaymentMode: false, // Сразу вернуть результат в приложение
+    emailBehavior: EEmailBehavior.OPTIONAL,
+  });
+};
+
+// Прямой запуск оплаты картой
+const cardPayment = async () => {
+  const result = await presentPaymentForm({
+    amount: '1500.00',
+    currency: 'RUB',
+    description: 'Оплата картой',
+    singlePaymentMode: EPaymentMethod.CARD,
+    emailBehavior: EEmailBehavior.REQUIRED,
+  });
+};
+```
+
+### 6. Настройка порядка способов оплаты (SDK 2.1.0+)
+
+```typescript
+import { EPaymentMethod, EEmailBehavior } from '@lmapp/react-native-cloudpayments';
+
+const paymentWithCustomOrder = async () => {
+  const result = await presentPaymentForm({
+    amount: '1000.00',
+    currency: 'RUB',
+    description: 'Платеж с кастомным порядком',
+    // Первыми будут отображены карта, затем TPay, затем СБП
+    paymentMethodSequence: [
+      EPaymentMethod.CARD,
+      EPaymentMethod.TPAY,
+      EPaymentMethod.SBP
+    ],
+    emailBehavior: EEmailBehavior.OPTIONAL,
   });
 };
 ```
@@ -359,12 +416,16 @@ const applePayPayment = async () => {
 // Настройка цветовой схемы (выполняется в нативном коде)
 // См. документацию по платформам для деталей
 
+import { EEmailBehavior, EPaymentMethod } from '@lmapp/react-native-cloudpayments';
+
 const customizedPayment = async () => {
   const result = await presentPaymentForm({
     amount: '1000.00',
     currency: 'RUB',
     description: 'Стильный платеж',
-    showResultScreen: true,
+    // Порядок отображения способов оплаты (SDK 2.1.0+)
+    paymentMethodSequence: [EPaymentMethod.CARD, EPaymentMethod.TPAY, EPaymentMethod.SBP],
+    emailBehavior: EEmailBehavior.OPTIONAL,
   });
 };
 ```
@@ -610,7 +671,7 @@ const PaymentComponent = () => {
         amount: '1000.00',
         currency: 'RUB',
         description: 'Покупка товара',
-        showResultScreen: true, // Показываем результат в форме
+        emailBehavior: EEmailBehavior.OPTIONAL,
       });
 
       if (result.success) {

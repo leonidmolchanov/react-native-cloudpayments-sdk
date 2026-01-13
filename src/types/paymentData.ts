@@ -958,7 +958,3 @@ export interface IPaymentData
 export interface ICreateIntentPaymentData
   extends IBasePaymentData,
     IPaymentConfigurationData {}
-
-// ============================================================================
-// CARDIO CONFIGURATION INTERFACE
-// ============================================================================

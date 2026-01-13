@@ -219,11 +219,11 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
     public func onPaymentClosed() {
         DispatchQueue.main.async { [weak self] in
             // Платеж был закрыт пользователем без завершения
-            self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
-                EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
+          self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
+              EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
                 EResponseKeys.statusCode.rawValue: false,
                 EResponseKeys.message.rawValue: "Payment closed by user"
-            ])
+          ])
             self?.cleanup()
         }
     }
