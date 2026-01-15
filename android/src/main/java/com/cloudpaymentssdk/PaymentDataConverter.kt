@@ -12,6 +12,8 @@ import ru.cloudpayments.sdk.configuration.EmailBehavior
 import ru.cloudpayments.sdk.api.models.PaymentDataPayer
 import org.json.JSONObject
 import org.json.JSONArray
+import ru.cloudpayments.sdk.api.models.intent.CPRecurrent
+import android.util.Log
 
 /**
  * Утилиты для конвертации данных между React Native и CloudPayments Android SDK
@@ -24,7 +26,81 @@ import org.json.JSONArray
  */
 object PaymentDataConverter {
 
-    /**
+  private fun readableMapToHashMap(map: ReadableMap?): HashMap<String, Any?> {
+    val result = HashMap<String, Any?>()
+    if (map == null) return result
+
+    val it = map.keySetIterator()
+    while (it.hasNextKey()) {
+      val key = it.nextKey()
+      when (map.getType(key)) {
+        ReadableType.Null -> result[key] = null
+        ReadableType.Boolean -> result[key] = map.getBoolean(key)
+        ReadableType.Number -> {
+          val d = map.getDouble(key)
+          result[key] = if (d == d.toLong().toDouble()) d.toLong() else d
+        }
+        ReadableType.String -> result[key] = map.getString(key)
+        ReadableType.Map -> result[key] = readableMapToHashMap(map.getMap(key))
+        ReadableType.Array -> result[key] = readableArrayToArrayList(map.getArray(key))
+      }
+    }
+    return result
+  }
+
+  private fun readableArrayToArrayList(arr: ReadableArray?): ArrayList<Any?> {
+    val result = ArrayList<Any?>()
+    if (arr == null) return result
+
+    for (i in 0 until arr.size()) {
+      when (arr.getType(i)) {
+        ReadableType.Null -> result.add(null)
+        ReadableType.Boolean -> result.add(arr.getBoolean(i))
+        ReadableType.Number -> {
+          val d = arr.getDouble(i)
+          result.add(if (d == d.toLong().toDouble()) d.toLong() else d)
+        }
+        ReadableType.String -> result.add(arr.getString(i))
+        ReadableType.Map -> result.add(readableMapToHashMap(arr.getMap(i)))
+        ReadableType.Array -> result.add(readableArrayToArrayList(arr.getArray(i)))
+      }
+    }
+    return result
+  }
+
+  private fun normalizeReceiptMap(receipt: HashMap<String, Any?>): HashMap<String, Any?> {
+    // items -> Items
+    if (receipt.containsKey("items") && !receipt.containsKey("Items")) {
+      receipt["Items"] = receipt["items"]
+      receipt.remove("items")
+    }
+    // isBso -> IsBso (очень частая ошибка)
+    if (receipt.containsKey("isBso") && !receipt.containsKey("IsBso")) {
+      receipt["IsBso"] = receipt["isBso"]
+      receipt.remove("isBso")
+    }
+    return receipt
+  }
+
+  private fun normalizeRecurrentMap(recurrent: HashMap<String, Any?>): HashMap<String, Any?> {
+    // customerReceipt -> CustomerReceipt (+ items -> Items внутри)
+    val cr = recurrent["customerReceipt"]
+    if (cr is HashMap<*, *>) {
+      @Suppress("UNCHECKED_CAST")
+      val customerReceipt = cr as HashMap<String, Any?>
+      normalizeReceiptMap(customerReceipt)
+
+      if (!recurrent.containsKey("CustomerReceipt")) {
+        recurrent["CustomerReceipt"] = customerReceipt
+      }
+      recurrent.remove("customerReceipt")
+    }
+    return recurrent
+  }
+
+
+
+  /**
      * Конвертация ReadableMap в JSON строку
      *
      * @param readableMap Карта данных из React Native
@@ -101,6 +177,7 @@ object PaymentDataConverter {
         return jsonArray
     }
 
+
     /**
      * Создание PaymentDataPayer из React Native данных
      *
@@ -148,9 +225,13 @@ object PaymentDataConverter {
 
             // SDK 2.1.1: Receipt передается как Map<String, Any>
             if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
-                val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
+              Log.d("CloudPaymentsSDKPay", "RECEIPT key exists")
+
+              val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
                 val receiptJson = JSONObject(readableMapToJson(receiptMap))
-                // Приводим ключи к ожидаемому формату API: items -> Items
+              Log.d("CloudPaymentsSDKPay", "receiptJson(before normalize) = ${receiptJson.toString(2)}")
+
+              // Приводим ключи к ожидаемому формату API: items -> Items
                 if (receiptJson.has("items") && !receiptJson.has("Items")) {
                     receiptJson.put("Items", receiptJson.getJSONArray("items"))
                     receiptJson.remove("items")
@@ -163,6 +244,8 @@ object PaymentDataConverter {
                     jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, newCloudPayments)
                     newCloudPayments
                 }
+              Log.d("CloudPaymentsSDKPay", "receiptJson(before normalize final) = ${receiptJson.toString(2)}")
+
 
                 cloudPaymentsJson.put(EPaymentConfigKeys.CUSTOMER_RECEIPT.rawValue, receiptJson)
             }
@@ -244,14 +327,45 @@ object PaymentDataConverter {
         val useDualMessagePayment = paymentDataMap.hasKey(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue) &&
                 paymentDataMap.getBoolean(EPaymentConfigKeys.USE_DUAL_MESSAGE_PAYMENT.rawValue)
 
-        val paymentData = PaymentData(
+      val receipt: HashMap<String, Any?>? =
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
+          val rm = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
+          normalizeReceiptMap(readableMapToHashMap(rm))
+        } else null
+
+      val recurrent: CPRecurrent? =
+        if (paymentDataMap.hasKey(EPaymentConfigKeys.RECURRENT.rawValue)) {
+          val rcm = paymentDataMap.getMap(EPaymentConfigKeys.RECURRENT.rawValue)
+
+          val interval =
+            rcm?.getString("interval")
+              ?: rcm?.getString("Interval")
+              ?: "Month"
+
+          val period =
+            when {
+              rcm?.hasKey("period") == true -> rcm.getInt("period")
+              rcm?.hasKey("Period") == true -> rcm.getInt("Period")
+              else -> 1
+            }
+
+          CPRecurrent(
+            interval = interval,
+            period = period,
+            customerReceipt = receipt // ВАЖНО: в SDK это поле сериализуется как "receipt"
+          )
+        } else null
+
+        val paymentData =  PaymentData(
             amount = paymentDataMap.getString(EPaymentConfigKeys.AMOUNT.rawValue) ?: "0",
             currency = paymentDataMap.getString(EPaymentConfigKeys.CURRENCY.rawValue) ?: ECurrency.RUB,
             description = paymentDataMap.getString(EPaymentConfigKeys.DESCRIPTION.rawValue),
             accountId = paymentDataMap.getString(EPaymentConfigKeys.ACCOUNT_ID.rawValue),
             email = paymentDataMap.getString(EPaymentConfigKeys.EMAIL.rawValue),
             payer = payer,
-            jsonData = jsonDataString
+            receipt = receipt, // Информациюя для создания чека
+            recurrent = recurrent,
+          jsonData = jsonDataString
         )
 
         // SDK 2.1.1: Новая структура PaymentConfiguration
