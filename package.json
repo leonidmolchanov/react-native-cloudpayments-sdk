@@ -1,6 +1,6 @@
 {
   "name": "@lmapp/react-native-cloudpayments",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "🚀 Мощный SDK для интеграции платежей CloudPayments в React Native. Поддержка Apple Pay, Google Pay, СБП, банковских карт. Полная типизация TypeScript. iOS 12+ и Android 21+",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
