@@ -84,6 +84,12 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        // CloudPayments SDK 2.1.1: manifestPlaceholders для deeplink
+        // Необходимо для корректного возврата из приложения банка после оплаты
+        manifestPlaceholders = [
+            cpSdkHost: "cloudpaymentssdk.example.payments"
+        ]
     }
     signingConfigs {
         debug {

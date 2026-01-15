@@ -8,11 +8,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import ru.cloudpayments.sdk.configuration.CloudpaymentsSDK
 import ru.cloudpayments.sdk.configuration.PaymentConfiguration
-import ru.cloudpayments.sdk.configuration.PaymentData
-import ru.cloudpayments.sdk.models.Transaction
-import ru.cloudpayments.sdk.api.models.PaymentDataReceiptItem
-import ru.cloudpayments.sdk.api.models.PaymentDataReceiptAmounts
-import ru.cloudpayments.sdk.api.models.PaymentDataReceipt
 
 /**
  * Сервис для работы с платежной формой CloudPayments
@@ -94,13 +89,18 @@ class PaymentFormService(
 
     /**
      * Запуск платежной формы через Activity Result API
+     * SDK 2.1.1: Результат содержит status, transactionId, reasonCode
      */
     private fun launchPaymentForm(activity: AppCompatActivity, configuration: PaymentConfiguration) {
         try {
-            // Создаем launcher если его еще нет
+            // SDK 2.1.1: launcher возвращает результат с полями status, transactionId, reasonCode
             if (paymentLauncher == null) {
-                paymentLauncher = CloudpaymentsSDK.getInstance().launcher(activity) { transaction ->
-                    handlePaymentResult(transaction)
+                paymentLauncher = CloudpaymentsSDK.getInstance().launcher(activity) { result ->
+                    handlePaymentResult(
+                        status = result.status,
+                        transactionId = result.transactionId,
+                        reasonCode = result.reasonCode ?: 0
+                    )
                 }
             }
 
@@ -125,23 +125,26 @@ class PaymentFormService(
 
     /**
      * Обработка результата платежа
-     *
-     * @param transaction Результат транзакции от Android SDK
+     * SDK 2.1.1: Результат содержит status, transactionId, reasonCode
      */
-    private fun handlePaymentResult(transaction: Transaction) {
+    private fun handlePaymentResult(
+        status: CloudpaymentsSDK.TransactionStatus?,
+        transactionId: Long?,
+        reasonCode: Int
+    ) {
         // Отправляем событие "willHide"
         eventEmitter.sendFormWillHide()
 
-        when (transaction.status) {
+        when (status) {
             CloudpaymentsSDK.TransactionStatus.Succeeded -> {
-                handleSuccessfulPayment(transaction)
+                handleSuccessfulPayment(transactionId ?: 0L)
             }
 
             CloudpaymentsSDK.TransactionStatus.Failed -> {
-                handleFailedPayment(transaction)
+                handleFailedPayment(reasonCode)
             }
 
-            else -> {
+            null -> {
                 handleCancelledPayment()
             }
         }
@@ -156,9 +159,7 @@ class PaymentFormService(
     /**
      * Обработка успешного платежа
      */
-    private fun handleSuccessfulPayment(transaction: Transaction) {
-        val transactionId = transaction.transactionId ?: 0L
-
+    private fun handleSuccessfulPayment(transactionId: Long) {
         // Отправляем событие успешной транзакции
         eventEmitter.sendTransactionSuccess(
             transactionId = transactionId,
@@ -166,15 +167,17 @@ class PaymentFormService(
         )
 
         // Возвращаем результат в Promise
-        val result = PaymentDataConverter.transactionToWritableMap(transaction)
-        currentPromise?.promise?.resolve(result)
+        val response = PaymentDataConverter.createSuccessResponse(
+            transactionId = transactionId,
+            message = EDefaultMessages.PAYMENT_COMPLETED_SUCCESSFULLY.rawValue
+        )
+        currentPromise?.promise?.resolve(response)
     }
 
     /**
      * Обработка неудачного платежа
      */
-    private fun handleFailedPayment(transaction: Transaction) {
-        val reasonCode = transaction.reasonCode
+    private fun handleFailedPayment(reasonCode: Int) {
         val errorCode = PaymentDataConverter.getErrorCodeFromReasonCode(reasonCode)
         val errorMessage = PaymentDataConverter.getErrorMessage(reasonCode)
 

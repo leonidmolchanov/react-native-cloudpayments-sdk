@@ -7,12 +7,10 @@ public class CloudpaymentsPaymentFormService: NSObject {
 
     private let CPSDK: CloudpaymentsSdkImpl?
     private let publicId: String
-    private var currentPaymentForm: PaymentForm?
 
     // Callbacks для React Native
     private var onPaymentSuccess: RCTResponseSenderBlock?
     private var onPaymentFailure: RCTResponseSenderBlock?
-    var scanner: CloudpaymentsCardIOService?
     @objc public init(publicId: String, CPSDK: CloudpaymentsSdkImpl?) {
         self.CPSDK = CPSDK
         self.publicId = publicId
@@ -54,7 +52,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
 
         DispatchQueue.main.async { [weak self] in
             self?.showPaymentForm(
-                paymentData:paymentData,
+                paymentData: paymentData,
                 onSuccess: onSuccess,
                 onFailure: onFailure
             )
@@ -64,7 +62,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
     // MARK: - Private Implementation
 
     private func showPaymentForm(
-        paymentData:[String: Any],
+        paymentData: [String: Any],
         onSuccess: @escaping RCTResponseSenderBlock,
         onFailure: @escaping RCTResponseSenderBlock
     ) {
@@ -82,35 +80,91 @@ public class CloudpaymentsPaymentFormService: NSObject {
         self.onPaymentFailure = onFailure
 
       if let applePayMerchantId = paymentData[EPaymentConfigKeys.applePayMerchantId.rawValue] as? String, !applePayMerchantId.isEmpty {
-          paymentObj.setApplePayMerchantId(applePayMerchantId)
+          _ = paymentObj.setApplePayMerchantId(applePayMerchantId)
       }
-      let isApplePayDisabled = (paymentData[EPaymentConfigKeys.disableApplePay.rawValue] as? Bool) ?? EDefaultValues.disableApplePay
+      
+      // Преобразуем requireEmail в emailBehavior
       let isRequireEmail = (paymentData[EPaymentConfigKeys.requireEmail.rawValue] as? Bool) ?? EDefaultValues.requireEmail
+      var emailBehavior: EmailBehaviorType = isRequireEmail ? .required : .optional
+      
+      // Если передан emailBehavior напрямую
+      if let emailBehaviorString = paymentData[EPaymentConfigKeys.emailBehavior.rawValue] as? String {
+          switch emailBehaviorString.lowercased() {
+          case "required":
+              emailBehavior = .required
+          case "hidden":
+              emailBehavior = .hidden
+          default:
+              emailBehavior = .optional
+          }
+      }
+      
       let useDualMessagePayment = (paymentData[EPaymentConfigKeys.useDualMessagePayment.rawValue] as? Bool) ?? EDefaultValues.useDualMessagePayment
+      let disableApplePay = (paymentData[EPaymentConfigKeys.disableApplePay.rawValue] as? Bool) ?? EDefaultValues.disableApplePay
 
-      let isUseScanner = (paymentData[EPaymentConfigKeys.enableCardScanner.rawValue] as? Bool) ?? false
-      self.scanner = isUseScanner ? CloudpaymentsCardIOService(config: [:]) : nil
+      // Парсим paymentMethodSequence (обязательный параметр, не опциональный)
+      var paymentMethodSequence: [PaymentMethodType] = []
+      if let sequenceArray = paymentData[EPaymentConfigKeys.paymentMethodSequence.rawValue] as? [String] {
+          paymentMethodSequence = sequenceArray.compactMap { methodString in
+              switch methodString.lowercased() {
+              case "tpay", "tinkoffpay":
+                  return .tpay
+              case "card":
+                  return .card
+              case "sberpay":
+                  return .sberPay
+              case "sbp":
+                  return .sbp
+              case "dolyame":
+                  return .dolyame
+              default:
+                  return nil
+              }
+          }
+      }
 
+      // Парсим singlePaymentMode
+      var singlePaymentMode: PaymentMethodType? = nil
+      if let singleModeString = paymentData[EPaymentConfigKeys.singlePaymentMode.rawValue] as? String {
+          switch singleModeString.lowercased() {
+          case "tpay", "tinkoffpay":
+              singlePaymentMode = .tpay
+          case "card":
+              singlePaymentMode = .card
+          case "sberpay":
+              singlePaymentMode = .sberPay
+          case "sbp":
+              singlePaymentMode = .sbp
+          case "dolyame":
+              singlePaymentMode = .dolyame
+          default:
+              singlePaymentMode = nil
+          }
+      }
+
+      let showResultScreenForSinglePaymentMode = (paymentData[EPaymentConfigKeys.showResultScreenForSinglePaymentMode.rawValue] as? Bool) ?? true
 
         let successRedirectUrl = (paymentData[EPaymentConfigKeys.successRedirectUrl.rawValue] as? String) ?? nil
         let failRedirectUrl = (paymentData[EPaymentConfigKeys.failRedirectUrl.rawValue] as? String) ?? nil
 
-        // Создаем конфигурацию
+        // Создаем конфигурацию с правильным порядком параметров согласно SDK 2.1.0
         let configuration = PaymentConfiguration(
             publicId: publicId,
             paymentData: paymentObj,
             delegate: self,
             uiDelegate: self,
-            scanner:scanner,
-            requireEmail: isRequireEmail,
+            emailBehavior: emailBehavior,
+            paymentMethodSequence: paymentMethodSequence,
+            singlePaymentMode: singlePaymentMode,
             useDualMessagePayment: useDualMessagePayment,
-            disableApplePay: isApplePayDisabled,
+            disableApplePay: disableApplePay,
+            showResultScreenForSinglePaymentMode: showResultScreenForSinglePaymentMode,
             successRedirectUrl: successRedirectUrl,
             failRedirectUrl: failRedirectUrl
         )
 
-        // Показываем форму
-        currentPaymentForm = PaymentForm.present(with: configuration, from: topViewController)
+        // Показываем форму через новый API
+        PaymentOptionsViewController.present(with: configuration, from: topViewController)
     }
 
     private func getTopViewController() -> UIViewController? {
@@ -162,19 +216,14 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
         }
     }
 
-    public func paymentFinishedIntentApi(_ transaction: Int64?) {
+    public func onPaymentClosed() {
         DispatchQueue.main.async { [weak self] in
-            let result: [String: Any] = [
-                EResponseKeys.success.rawValue: true,
-                EResponseKeys.transactionId.rawValue: transaction ?? EDefaultValues.defaultTransactionId,
-                EResponseKeys.message.rawValue: EDefaultMessages.paymentCompletedIntentApi.rawValue
-            ]
+            // Платеж был закрыт пользователем без завершения
           self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
-              EResponseKeys.statusCode.rawValue: true,
               EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
-              EResponseKeys.transactionId.rawValue: transaction as Any
+                EResponseKeys.statusCode.rawValue: false,
+                EResponseKeys.message.rawValue: "Payment closed by user"
           ])
-            self?.onPaymentSuccess?([result])
             self?.cleanup()
         }
     }
@@ -209,7 +258,6 @@ extension CloudpaymentsPaymentFormService: PaymentUIDelegate {
 extension CloudpaymentsPaymentFormService {
 
     private func cleanup() {
-        currentPaymentForm = nil
         onPaymentSuccess = nil
         onPaymentFailure = nil
     }

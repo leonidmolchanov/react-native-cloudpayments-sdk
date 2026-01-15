@@ -31,7 +31,6 @@ const sidebars: SidebarsConfig = {
       label: '💳 Использование',
       items: [
         'usage/payment-form',
-        'usage/card-scanner',
         'usage/receipts',
         'usage/recurrent-payments',
       ],

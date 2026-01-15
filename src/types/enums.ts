@@ -69,6 +69,71 @@ export enum EPaymentMethodType {
 }
 
 /**
+ * Способы оплаты для настройки платежной формы
+ *
+ * @description Перечисление способов оплаты, которые можно использовать
+ * для настройки порядка отображения и режима одного способа оплаты
+ * в стандартной платежной форме CloudPayments.
+ *
+ * @example Использование для paymentMethodSequence
+ * ```typescript
+ * import { EPaymentMethod } from '@lmapp/react-native-cloudpayments';
+ *
+ * const paymentData = {
+ *   amount: '1000.00',
+ *   currency: 'RUB',
+ *   paymentMethodSequence: [
+ *     EPaymentMethod.CARD,
+ *     EPaymentMethod.TPAY,
+ *     EPaymentMethod.SBP
+ *   ]
+ * };
+ * ```
+ *
+ * @example Использование для singlePaymentMode
+ * ```typescript
+ * const paymentData = {
+ *   amount: '1000.00',
+ *   currency: 'RUB',
+ *   singlePaymentMode: EPaymentMethod.CARD // Прямой запуск оплаты картой
+ * };
+ * ```
+ *
+ * @since 2.1.0
+ */
+export enum EPaymentMethod {
+  /**
+   * Банковская карта
+   * @description Оплата банковской картой с вводом данных карты
+   */
+  CARD = 'card',
+
+  /**
+   * Tinkoff Pay
+   * @description Быстрая оплата через приложение Тинькофф Банка
+   */
+  TPAY = 'tpay',
+
+  /**
+   * Sberbank Pay
+   * @description Оплата через приложение Сбербанк Онлайн
+   */
+  SBERPAY = 'sberpay',
+
+  /**
+   * Система быстрых платежей (СБП)
+   * @description Мгновенные переводы по номеру телефона
+   */
+  SBP = 'sbp',
+
+  /**
+   * Долями
+   * @description Оплата частями через сервис Долями
+   */
+  DOLYAME = 'dolyame',
+}
+
+/**
  * Коды ошибок, которые может возвращать платежная форма CloudPayments
  *
  * @description Перечисление всех возможных ошибок, которые могут возникнуть
@@ -303,99 +368,47 @@ export enum EPaymentFormAction {
 }
 
 // ============================================================================
-// CARDIO ENUMS
+// EMAIL BEHAVIOR ENUM
 // ============================================================================
 
 /**
- * Поддерживаемые языки интерфейса CardIO сканера
+ * Поведение поля email в платежной форме
  *
- * @description Перечисление языков, поддерживаемых CardIO для локализации
- * интерфейса сканера банковских карт. Если язык не указан, используется
- * язык устройства по умолчанию.
+ * @description Определяет, как отображается и используется поле email
+ * в стандартной платежной форме CloudPayments.
  *
- * @example Использование языков CardIO
+ * @example Использование emailBehavior
  * ```typescript
- * import { ECardIOLanguage } from '@lmapp/react-native-cloudpayments';
+ * import { EEmailBehavior } from '@lmapp/react-native-cloudpayments';
  *
- * const cardScannerConfig = {
- *   language: ECardIOLanguage.RUSSIAN,
- *   requireExpiry: true,
- *   hideCardIOLogo: true
+ * const paymentData = {
+ *   amount: '1000.00',
+ *   currency: 'RUB',
+ *   emailBehavior: EEmailBehavior.REQUIRED // Обязательное поле
  * };
  * ```
  *
- * @since 1.0.0
- * @platform android
+ * @since 2.1.0
  */
-export enum ECardIOLanguage {
-  /** Английский язык */
-  ENGLISH = 'en',
-  /** Русский язык */
-  RUSSIAN = 'ru',
-  /** Французский язык */
-  FRENCH = 'fr',
-  /** Немецкий язык */
-  GERMAN = 'de',
-  /** Итальянский язык */
-  ITALIAN = 'it',
-  /** Японский язык */
-  JAPANESE = 'ja',
-  /** Корейский язык */
-  KOREAN = 'ko',
-  /** Португальский язык */
-  PORTUGUESE = 'pt',
-  /** Шведский язык */
-  SWEDISH = 'sv',
-  /** Китайский упрощенный */
-  CHINESE_SIMPLIFIED = 'zh-Hans',
-  /** Китайский традиционный */
-  CHINESE_TRADITIONAL = 'zh-Hant',
-  /** Испанский язык */
-  SPANISH = 'es',
-}
+export enum EEmailBehavior {
+  /**
+   * Опциональное поле
+   * @description Пользователь может включить/отключить поле email.
+   * Это значение по умолчанию.
+   */
+  OPTIONAL = 'optional',
 
-/**
- * Предустановленные цветовые схемы для CardIO сканера
- *
- * @description Перечисление готовых цветов в стиле Material Design
- * для настройки внешнего вида CardIO сканера. Можно использовать
- * как для цвета ActionBar, так и для цвета рамки сканирования.
- *
- * @example Использование цветовых схем
- * ```typescript
- * import { ECardIOColorScheme } from '@lmapp/react-native-cloudpayments';
- *
- * const cardScannerConfig = {
- *   actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
- *   guideColor: ECardIOColorScheme.MATERIAL_GREEN,
- *   language: 'ru'
- * };
- * ```
- *
- * @since 1.0.0
- * @platform android
- */
-export enum ECardIOColorScheme {
-  /** Material Design синий цвет (#2196F3) */
-  MATERIAL_BLUE = '#2196F3',
-  /** Material Design зеленый цвет (#4CAF50) */
-  MATERIAL_GREEN = '#4CAF50',
-  /** Material Design красный цвет (#F44336) */
-  MATERIAL_RED = '#F44336',
-  /** Material Design оранжевый цвет (#FF9800) */
-  MATERIAL_ORANGE = '#FF9800',
-  /** Material Design фиолетовый цвет (#9C27B0) */
-  MATERIAL_PURPLE = '#9C27B0',
-  /** Material Design темно-синий цвет (#3F51B5) */
-  MATERIAL_INDIGO = '#3F51B5',
-  /** Material Design голубой цвет (#00BCD4) */
-  MATERIAL_CYAN = '#00BCD4',
-  /** Material Design розовый цвет (#E91E63) */
-  MATERIAL_PINK = '#E91E63',
-  /** Черный цвет */
-  BLACK = '#000000',
-  /** Белый цвет */
-  WHITE = '#FFFFFF',
-  /** Серый цвет */
-  GRAY = '#9E9E9E',
+  /**
+   * Обязательное поле
+   * @description Поле email обязательно для заполнения.
+   * Рекомендуется при работе с чеками по 54-ФЗ.
+   */
+  REQUIRED = 'required',
+
+  /**
+   * Скрытое поле
+   * @description Поле email не отображается в форме.
+   * Используется, если email передается отдельно или не требуется.
+   */
+  HIDDEN = 'hidden',
 }

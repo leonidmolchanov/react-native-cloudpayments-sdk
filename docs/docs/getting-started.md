@@ -10,7 +10,7 @@ sidebar_position: 2
 
 Убедитесь, что у вас установлены:
 
-- **React Native**: 0.70.0 или выше
+- **React Native**: 0.82.0 или выше (для поддержки Kotlin 2.2.0)
 - **Node.js**: 16.0 или выше
 - **iOS**: Xcode 14+ для разработки под iOS
 - **Android**: Android Studio с API level 21+
@@ -87,13 +87,14 @@ const PaymentScreen = () => {
 
   const handlePayment = async () => {
     try {
+import { EEmailBehavior } from '@lmapp/react-native-cloudpayments';
+
       const result = await presentPaymentForm({
         amount: '1000.00',
         currency: 'RUB',
         description: 'Тестовый платеж',
         email: 'test@example.com',
-        requireEmail: true,
-        showResultScreen: true,
+        emailBehavior: EEmailBehavior.REQUIRED, // SDK 2.1.0+
       });
 
       if (result.success) {

@@ -581,7 +581,7 @@ export interface IPayer {
  * @since 1.0.0
  */
 
-import type { ECardIOLanguage, ECardIOColorScheme } from './enums';
+import type { EEmailBehavior, EPaymentMethod } from './enums';
 
 // ============================================================================
 // PAYMENT DATA INTERFACES
@@ -674,23 +674,6 @@ export interface IBasePaymentData {
   receipt?: Receipt;
 
   payer?: IPayer;
-  /**
-   * Включение сканера банковских карт (опционально)
-   * @description Если true, в платежной форме будет доступна кнопка
-   * для сканирования банковской карты с помощью камеры устройства.
-   * Использует CardIO библиотеку для распознавания номера карты и срока действия.
-   * @default false
-   * @platform android
-   */
-  enableCardScanner?: boolean;
-
-  /**
-   * Настройки CardIO сканера (опционально)
-   * @description Детальная конфигурация поведения и внешнего вида CardIO сканера.
-   * Применяется только если enableCardScanner = true.
-   * @platform android
-   */
-  cardScannerConfig?: ICardIOConfig;
 }
 
 /**
@@ -723,8 +706,18 @@ export interface IPaymentConfigurationData {
    * @description Если true, пользователь обязан указать email.
    * Рекомендуется включать при работе с чеками по 54-ФЗ.
    * @default false
+   * @deprecated Используйте emailBehavior вместо requireEmail
    */
   requireEmail?: boolean;
+
+  /**
+   * Поведение поля email (опционально)
+   * @description Определяет, как отображается и используется поле email в платежной форме.
+   * @default EEmailBehavior.OPTIONAL
+   * @example EEmailBehavior.REQUIRED
+   * @since 2.1.0
+   */
+  emailBehavior?: EEmailBehavior;
 
   /**
    * Использование двухстадийных платежей (опционально)
@@ -733,15 +726,6 @@ export interface IPaymentConfigurationData {
    * @default false
    */
   useDualMessagePayment?: boolean;
-
-  /**
-   * Отключение Apple Pay (опционально)
-   * @description Если true, Apple Pay не будет отображаться в форме оплаты.
-   * Полезно для тестирования или если Apple Pay не настроен.
-   * @default false
-   * @platform ios
-   */
-  disableApplePay?: boolean;
 
   /**
    * Merchant ID для Apple Pay (опционально)
@@ -753,9 +737,37 @@ export interface IPaymentConfigurationData {
   applePayMerchantId?: string;
 
   /**
+   * Порядок отображения способов оплаты (опционально)
+   * @description Массив способов оплаты, определяющий порядок их отображения.
+   * Если указаны не все методы, остальные будут отображены в порядке по умолчанию.
+   * @example [EPaymentMethod.CARD, EPaymentMethod.TPAY, EPaymentMethod.SBP]
+   * @since 2.1.0
+   */
+  paymentMethodSequence?: EPaymentMethod[];
+
+  /**
+   * Режим одного способа оплаты (опционально)
+   * @description Если указан, SDK пропустит экран выбора способов оплаты
+   * и сразу запустит выбранный способ оплаты (если он доступен на терминале).
+   * @example EPaymentMethod.CARD
+   * @since 2.1.0
+   */
+  singlePaymentMode?: EPaymentMethod;
+
+  /**
+   * Показывать ли финальный экран в режиме одного способа оплаты (опционально)
+   * @description Если false, SDK сразу после оплаты вернет результат в приложение,
+   * не показывая экран успеха или ошибки. Работает только в режиме одного способа оплаты.
+   * @default true
+   * @since 2.1.0
+   */
+  showResultScreenForSinglePaymentMode?: boolean;
+
+  /**
    * URL для редиректа при успешном платеже (опционально)
    * @description Адрес, на который будет перенаправлен пользователь
    * после успешного завершения платежа в веб-форме.
+   * Для CБП, TPay, SberPay, Долями нужно использовать Universal Links.
    * @example 'https://example.com/payment/success'
    */
   successRedirectUrl?: string;
@@ -764,25 +776,11 @@ export interface IPaymentConfigurationData {
    * URL для редиректа при неудачном платеже (опционально)
    * @description Адрес, на который будет перенаправлен пользователь
    * при ошибке или отмене платежа в веб-форме.
+   * Для CБП, TPay, SberPay, Долями нужно использовать Universal Links.
    * @example 'https://example.com/payment/fail'
    */
   failRedirectUrl?: string;
 
-  /**
-   * Режим сохранения карт для разовых платежей (опционально)
-   * @description Если true, пользователь сможет сохранить карту
-   * для будущих платежей даже при разовой оплате.
-   * @default false
-   */
-  saveCardSinglePaymentMode?: boolean;
-
-  /**
-   * Показ экрана с результатом платежа (опционально)
-   * @description Если true, после завершения платежа будет показан
-   * экран с результатом операции перед закрытием формы.
-   * @default true
-   */
-  showResultScreen?: boolean;
   receipt?: Receipt;
   payer?: IPayer;
 
@@ -960,229 +958,3 @@ export interface IPaymentData
 export interface ICreateIntentPaymentData
   extends IBasePaymentData,
     IPaymentConfigurationData {}
-
-// ============================================================================
-// CARDIO CONFIGURATION INTERFACE
-// ============================================================================
-
-/**
- * Конфигурация CardIO сканера банковских карт
- *
- * @description Детальные настройки поведения и внешнего вида CardIO сканера.
- * Позволяет настроить требования к полям карты, цветовую схему, локализацию
- * и дополнительные параметры интерфейса.
- *
- * @example Базовая конфигурация
- * ```typescript
- * import { ECardIOLanguage, ECardIOColorScheme } from '@lmapp/react-native-cloudpayments';
- *
- * const cardScannerConfig: ICardIOConfig = {
- *   requireExpiry: true,
- *   requireCVV: false,
- *   hideCardIOLogo: true,
- *   actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
- *   guideColor: ECardIOColorScheme.MATERIAL_GREEN,
- *   language: ECardIOLanguage.RUSSIAN
- * };
- * ```
- *
- * @example Расширенная конфигурация
- * ```typescript
- * const advancedConfig: ICardIOConfig = {
- *   // Поля карты
- *   requireExpiry: true,
- *   requireCVV: false,
- *   requirePostalCode: false,
- *   requireCardholderName: true,
- *
- *   // Интерфейс
- *   hideCardIOLogo: true,
- *   usePayPalLogo: false,
- *   suppressManualEntry: false,
- *
- *   // Цвета
- *   actionBarColor: '#1976D2',
- *   guideColor: ECardIOColorScheme.MATERIAL_GREEN,
- *
- *   // Локализация
- *   language: ECardIOLanguage.RUSSIAN,
- *
- *   // Дополнительно
- *   suppressConfirmation: false,
- *   suppressScan: false,
- *   keepApplicationTheme: true
- * };
- * ```
- *
- * @since 1.0.0
- * @platform android
- */
-export interface ICardIOConfig {
-  // ============================================================================
-  // ПОЛЯ КАРТЫ
-  // ============================================================================
-
-  /**
-   * Требовать ввод срока действия карты
-   *
-   * @description Если `true`, пользователь должен будет ввести месяц и год истечения карты.
-   * Рекомендуется оставлять `true` для полной валидации карты.
-   *
-   * @default true
-   * @example true
-   */
-  requireExpiry?: boolean;
-
-  /**
-   * Требовать ввод CVV кода
-   *
-   * @description Если `true`, пользователь должен будет ввести CVV код карты.
-   *
-   * ⚠️ **НЕ РЕКОМЕНДУЕТСЯ** для безопасности - CVV лучше вводить отдельно
-   * в защищенной форме платежа.
-   *
-   * @default false
-   * @example false
-   */
-  requireCVV?: boolean;
-
-  /**
-   * Требовать ввод почтового индекса
-   *
-   * @description Если `true`, пользователь должен будет ввести почтовый индекс.
-   * Используется для дополнительной верификации в некоторых странах.
-   *
-   * @default false
-   * @example false
-   */
-  requirePostalCode?: boolean;
-
-  /**
-   * Требовать ввод имени держателя карты
-   *
-   * @description Если `true`, пользователь должен будет ввести имя на карте.
-   * Полезно для дополнительной идентификации плательщика.
-   *
-   * @default false
-   * @example true
-   */
-  requireCardholderName?: boolean;
-
-  // ============================================================================
-  // НАСТРОЙКИ ИНТЕРФЕЙСА
-  // ============================================================================
-
-  /**
-   * Скрыть логотип CardIO
-   *
-   * @description Если `true`, логотип CardIO не будет отображаться в верхней части экрана.
-   * Рекомендуется для брендинга собственного приложения.
-   *
-   * @default true
-   * @example true
-   */
-  hideCardIOLogo?: boolean;
-
-  /**
-   * Использовать логотип PayPal
-   *
-   * @description Если `true`, будет показан логотип PayPal вместо CardIO.
-   * Используется если приложение интегрировано с PayPal экосистемой.
-   *
-   * @default false
-   * @example false
-   */
-  usePayPalLogo?: boolean;
-
-  /**
-   * Скрыть кнопку ручного ввода
-   *
-   * @description Если `true`, кнопка "Ввести вручную" не будет отображаться.
-   * Принуждает пользователя использовать только сканирование.
-   *
-   * @default false
-   * @example false
-   */
-  suppressManualEntry?: boolean;
-
-  // ============================================================================
-  // ЦВЕТОВАЯ СХЕМА
-  // ============================================================================
-
-  /**
-   * Цвет ActionBar (заголовка)
-   *
-   * @description Цвет для верхней панели сканера.
-   * Можно использовать предустановленные цвета из ECardIOColorScheme или кастомный hex-код.
-   *
-   * @example ECardIOColorScheme.MATERIAL_BLUE
-   * @example '#2196F3'
-   */
-  actionBarColor?: ECardIOColorScheme | string;
-
-  /**
-   * Цвет рамки сканирования
-   *
-   * @description Цвет для рамки вокруг области сканирования карты.
-   * Яркие цвета (зеленый, синий) лучше видны на камере.
-   * Можно использовать предустановленные цвета из ECardIOColorScheme или кастомный hex-код.
-   *
-   * @example ECardIOColorScheme.MATERIAL_GREEN
-   * @example '#4CAF50'
-   */
-  guideColor?: ECardIOColorScheme | string;
-
-  // ============================================================================
-  // ЛОКАЛИЗАЦИЯ
-  // ============================================================================
-
-  /**
-   * Язык интерфейса
-   *
-   * @description Код языка для интерфейса CardIO.
-   * Если не указан, используется язык устройства.
-   * Можно использовать значения из ECardIOLanguage или строковый код языка.
-   *
-   * @example ECardIOLanguage.RUSSIAN
-   * @example ECardIOLanguage.ENGLISH
-   * @example 'ru'
-   */
-  language?: ECardIOLanguage | string;
-
-  // ============================================================================
-  // ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ
-  // ============================================================================
-
-  /**
-   * Отключить вибрацию при сканировании
-   *
-   * @description Если `true`, устройство не будет вибрировать при успешном сканировании.
-   * Полезно для тихих режимов или экономии батареи.
-   *
-   * @default false
-   * @example false
-   */
-  suppressConfirmation?: boolean;
-
-  /**
-   * Отключить звук при сканировании
-   *
-   * @description Если `true`, звук сканирования будет отключен.
-   * Рекомендуется для приложений с собственными звуковыми эффектами.
-   *
-   * @default false
-   * @example false
-   */
-  suppressScan?: boolean;
-
-  /**
-   * Сохранить тему приложения
-   *
-   * @description Если `true`, CardIO будет использовать тему основного приложения
-   * вместо собственной темы.
-   *
-   * @default false
-   * @example true
-   */
-  keepApplicationTheme?: boolean;
-}

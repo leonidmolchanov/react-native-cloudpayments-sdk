@@ -36,16 +36,16 @@ enum EPaymentConfigKeys: String, CaseIterable {
     case email = "email"
     case accountId = "accountId"
     case jsonData = "jsonData"
-    case requireEmail = "requireEmail"
+    case requireEmail = "requireEmail" // Deprecated, используйте emailBehavior
+    case emailBehavior = "emailBehavior" // Новое: "optional", "required", "hidden"
     case useDualMessagePayment = "useDualMessagePayment"
-    case disableApplePay = "disableApplePay"
+    case disableApplePay = "disableApplePay" // Все еще доступен в SDK 2.1.0
     case applePayMerchantId = "applePayMerchantId"
     case successRedirectUrl = "successRedirectUrl"
     case failRedirectUrl = "failRedirectUrl"
-    case saveCardSinglePaymentMode = "saveCardSinglePaymentMode"
-    case showResultScreen = "showResultScreen"
-    case enableCardScanner = "enableCardScanner"
-
+    case paymentMethodSequence = "paymentMethodSequence" // Новое: массив способов оплаты
+    case singlePaymentMode = "singlePaymentMode" // Новое: режим одного способа оплаты
+    case showResultScreenForSinglePaymentMode = "showResultScreenForSinglePaymentMode" // Новое
 }
 
 // MARK: - Payment Methods

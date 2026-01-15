@@ -1,15 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    
-    <!-- CardIO permissions -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    
-    <!-- CardIO features -->
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
     <application
       android:name=".MainApplication"
@@ -18,7 +10,8 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme"
-      android:supportsRtl="true">
+      android:supportsRtl="true"
+      tools:replace="android:allowBackup">
       <activity
         android:name=".MainActivity"
         android:exported="true"
@@ -29,20 +22,5 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      
-      <!-- CardIO Activities -->
-      <activity
-        android:name="io.card.payment.CardIOActivity"
-        android:configChanges="keyboardHidden|orientation"
-        android:hardwareAccelerated="true"
-        android:screenOrientation="portrait"
-        android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
-        android:exported="false" />
-      
-      <activity
-        android:name="io.card.payment.DataEntryActivity"
-        android:screenOrientation="portrait"
-        android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
-        android:exported="false" />
     </application>
 </manifest>

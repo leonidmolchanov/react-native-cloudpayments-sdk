@@ -41,29 +41,43 @@ enum class EPaymentConfigKeys(val rawValue: String) {
     EMAIL("email"),
     ACCOUNT_ID("accountId"),
     JSON_DATA("jsonData"),
-    REQUIRE_EMAIL("requireEmail"),
+    REQUIRE_EMAIL("requireEmail"), // @deprecated - use EMAIL_BEHAVIOR instead
+    EMAIL_BEHAVIOR("emailBehavior"),
     USE_DUAL_MESSAGE_PAYMENT("useDualMessagePayment"),
     DISABLE_APPLE_PAY("disableApplePay"),
     APPLE_PAY_MERCHANT_ID("applePayMerchantId"),
     SUCCESS_REDIRECT_URL("successRedirectUrl"),
     FAIL_REDIRECT_URL("failRedirectUrl"),
-    SAVE_CARD_SINGLE_PAYMENT_MODE("saveCardSinglePaymentMode"),
-    SHOW_RESULT_SCREEN("showResultScreen"),
+    PAYMENT_METHOD_SEQUENCE("paymentMethodSequence"),
+    SINGLE_PAYMENT_MODE("singlePaymentMode"),
+    SHOW_RESULT_SCREEN_FOR_SINGLE_PAYMENT_MODE("showResultScreenForSinglePaymentMode"),
     RECEIPT("receipt"),
     CLOUDPAYMENTS("CloudPayments"),
     CUSTOMER_RECEIPT("CustomerReceipt"),
     RECURRENT("recurrent"),
     UPPER_RECURRENT("Recurrent"),
-
 }
 
 // MARK: - Payment Methods
+// Соответствует CPPaymentMethod из SDK 2.1.1
 
 enum class EPaymentMethodType(val rawValue: String) {
+    CARD("card"),
     TPAY("tpay"),
     TINKOFFPAY("tinkoffpay"),
     SBP("sbp"),
-    SBERPAY("sberpay")
+    SBERPAY("sberpay"),
+    MIR_PAY("mirpay"),
+    DOLYAME("dolyame")
+}
+
+// MARK: - Email Behavior
+// Соответствует EmailBehavior из SDK 2.1.1
+
+enum class EEmailBehavior(val rawValue: String) {
+    OPTIONAL("optional"),
+    REQUIRED("required"),
+    HIDDEN("hidden")
 }
 
 // MARK: - Payment Form Events
@@ -111,11 +125,9 @@ enum class EDefaultMessages(val rawValue: String) {
 // MARK: - Default Values
 
 object EDefaultValues {
-    const val REQUIRE_EMAIL: Boolean = false
     const val USE_DUAL_MESSAGE_PAYMENT: Boolean = false
-    const val DISABLE_APPLE_PAY: Boolean = true
-    const val SHOW_RESULT_SCREEN: Boolean = false
     const val DEFAULT_TRANSACTION_ID: Long = 0L
+    const val SHOW_RESULT_SCREEN_FOR_SINGLE_PAYMENT_MODE: Boolean = true
 }
 
 // MARK: - Response Keys
@@ -183,28 +195,4 @@ object EAndroidSpecific {
     const val SUCCESS_PROCESSING_ERROR = "SUCCESS_PROCESSING_ERROR"
     const val FAILED_PROCESSING_ERROR = "FAILED_PROCESSING_ERROR"
     const val PAYMENT_FORM_ERROR = "PAYMENT_FORM_ERROR"
-}
-// MARK: - CardIO Configuration Keys
-
-enum class ECardIOConfigKeys(val rawValue: String) {
-  REQUIRE_EXPIRY("requireExpiry"),
-  REQUIRE_CVV("requireCVV"),
-  REQUIRE_POSTAL_CODE("requirePostalCode"),
-  REQUIRE_CARDHOLDER_NAME("requireCardholderName"),
-  HIDE_CARDIO_LOGO("hideCardIOLogo"),
-  USE_PAYPAL_LOGO("usePayPalLogo"),
-  SUPPRESS_MANUAL_ENTRY("suppressManualEntry"),
-  ACTION_BAR_COLOR("actionBarColor"),
-  GUIDE_COLOR("guideColor"),
-  LANGUAGE("language"),
-  SUPPRESS_CONFIRMATION("suppressConfirmation"),
-  SUPPRESS_SCAN("suppressScan"),
-  KEEP_APPLICATION_THEME("keepApplicationTheme")
-}
-
-// MARK: - CardIO Constants
-
-object ECardIOConstants {
-  const val ENABLE_CARD_SCANNER = "enableCardScanner"
-  const val CARD_SCANNER_CONFIG = "cardScannerConfig"
 }

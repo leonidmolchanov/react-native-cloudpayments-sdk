@@ -20,6 +20,8 @@ import {
 import {
   useCloudPayments,
   RECURENT_PERIOD,
+  EEmailBehavior,
+  EPaymentMethod,
 } from '@lmapp/react-native-cloudpayments';
 import type {
   IPaymentData,
@@ -186,36 +188,17 @@ const SAMPLE_PAYMENT_DATA: IPaymentData = {
   accountId: 'user_12345',
   publicId: PUBLIC_ID,
   requireEmail: true,
-  showResultScreen: true,
+  showResultScreenForSinglePaymentMode: true,
   payer: payer,
   receipt: receipt,
   recurrent: recurrent,
   jsonData: jsonData,
-  enableCardScanner: true, // Включаем сканер карт для Android
-  cardScannerConfig: {
-    // Настройки полей карты
-    requireExpiry: true,
-    requireCVV: false,
-    requirePostalCode: false,
-    requireCardholderName: false,
-
-    // Настройки интерфейса
-    hideCardIOLogo: true,
-    usePayPalLogo: false,
-    suppressManualEntry: false,
-
-    // Цветовая схема
-    // actionBarColor: ECardIOColorScheme.MATERIAL_BLUE,
-    // guideColor: ECardIOColorScheme.MATERIAL_GREEN,
-    //
-    // // Локализация
-    // language: ECardIOLanguage.RUSSIAN,
-
-    // Дополнительные настройки
-    suppressConfirmation: false,
-    suppressScan: false,
-    keepApplicationTheme: false,
-  },
+  emailBehavior: EEmailBehavior.OPTIONAL, // Новый параметр SDK 2.1.0
+  paymentMethodSequence: [
+    EPaymentMethod.CARD,
+    EPaymentMethod.TPAY,
+    EPaymentMethod.SBP,
+  ], // Порядок отображения способов оплаты
 };
 
 // ============================================================================
