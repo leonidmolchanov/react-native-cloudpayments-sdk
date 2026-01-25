@@ -1,7 +1,10 @@
 package com.cloudpaymentssdk
 
 import android.app.Activity
+import android.app.Application
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.FragmentActivity
 import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
@@ -22,11 +25,9 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
   private var pendingPromise: Promise? = null
   private var isProcessingResult = false // Защита от повторной обработки
 
-  // НОВОЕ: Переменные для отслеживания последней ошибки
-  private var lastPaymentError: String? = null
-  private var lastPaymentErrorCode: String? = null
   private var hasActivePaymentAttempt = false
-  private var paymentStartTime: Long = 0L
+  private var shouldSendDidDisplay = false
+  private var lifecycleCallback: Application.ActivityLifecycleCallbacks? = null
 
   companion object {
     const val NAME = EModuleNames.CLOUDPAYMENTS_SDK
@@ -35,11 +36,13 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
      * Helper функция для получения статуса транзакции с поддержкой новых API
      * Улучшенная версия с обработкой ошибок десериализации
      */
-    private fun getTransactionStatus(data: Intent?): CloudpaymentsSDK.TransactionStatus? {
-      if (data == null) return null
+    fun getTransactionStatus(data: Intent?): CloudpaymentsSDK.TransactionStatus? {
+      if (data == null) {
+        return null
+      }
 
       return try {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        val status = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
           data.getSerializableExtra(
             CloudpaymentsSDK.IntentKeys.TransactionStatus.name,
             CloudpaymentsSDK.TransactionStatus::class.java
@@ -49,11 +52,10 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           val serializable = data.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name)
           serializable as? CloudpaymentsSDK.TransactionStatus
         }
+        status
       } catch (e: ClassCastException) {
-        // Проблема с приведением типов - логируем и возвращаем null
         null
       } catch (e: Exception) {
-        // Любая другая ошибка при извлечении статуса
         null
       }
     }
@@ -61,6 +63,45 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
   init {
     reactApplicationContext.addActivityEventListener(this)
+    registerLifecycleCallback()
+  }
+  
+  /**
+   * Регистрация lifecycle callback для отслеживания, когда PaymentActivity действительно отобразилась
+   */
+  private fun registerLifecycleCallback() {
+    val application = reactApplicationContext.currentActivity?.application as? Application
+    if (application != null) {
+      lifecycleCallback = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityResumed(activity: Activity) {
+          val activityClassName = activity.javaClass.name
+          if (activityClassName == "ru.cloudpayments.sdk.ui.PaymentActivity" && shouldSendDidDisplay) {
+            shouldSendDidDisplay = false
+            eventEmitter.sendFormDidDisplay()
+          }
+        }
+        
+        override fun onActivityCreated(activity: Activity, savedInstanceState: android.os.Bundle?) {}
+        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityPaused(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, outState: android.os.Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {}
+      }
+      application.registerActivityLifecycleCallbacks(lifecycleCallback)
+    } else {
+    }
+  }
+  
+  /**
+   * Отмена регистрации lifecycle callback
+   */
+  private fun unregisterLifecycleCallback() {
+    val application = reactApplicationContext.currentActivity?.application as? Application
+    lifecycleCallback?.let { callback ->
+      application?.unregisterActivityLifecycleCallbacks(callback)
+      lifecycleCallback = null
+    }
   }
 
   override fun getName(): String {
@@ -227,19 +268,16 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
 
       // Сбрасываем флаги для нового платежа
       isProcessingResult = false
-
-      // НОВОЕ: Очищаем предыдущие ошибки при начале нового платежа
-      lastPaymentError = null
-      lastPaymentErrorCode = null
       hasActivePaymentAttempt = true
-      paymentStartTime = System.currentTimeMillis()
 
       // Создаем конфигурацию платежа
       val configuration = PaymentDataConverter.createPaymentConfiguration(currentPublicId, paymentData)
 
-      // Отправляем события
+      // Отправляем событие willDisplay
       eventEmitter.sendFormWillDisplay()
-      eventEmitter.sendFormDidDisplay()
+
+      // Устанавливаем флаг, что нужно отправить didDisplay когда Activity отобразится
+      shouldSendDidDisplay = true
 
       // Запускаем платежную форму напрямую
       CloudpaymentsSDK.getInstance().start(configuration, activity, EModuleNames.PAYMENT_REQUEST_CODE)
@@ -277,10 +315,38 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
     isProcessingResult = true
 
     val transactionStatus = getTransactionStatus(data)
-    val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, 0L) ?: 0L
-    val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+    
+    // Проверяем все возможные ключи для transactionId
+    val transactionIdKey = CloudpaymentsSDK.IntentKeys.TransactionId.name
+    val transactionId = try {
+      data?.getLongExtra(transactionIdKey, 0L) ?: 0L
+    } catch (e: Exception) {
+      try {
+        // Пробуем как Int
+        val intValue = data?.getIntExtra(transactionIdKey, 0) ?: 0
+        intValue.toLong()
+      } catch (e2: Exception) {
+        0L
+      }
+    }
 
-    // НОВОЕ: Проверяем, есть ли URL с информацией об ошибке (например, из 3D Secure)
+    // reasonCode может быть как String (старый SDK) так и Int (новый SDK)
+    val reasonCode: Int = try {
+      // Сначала пробуем получить как Int (новый SDK)
+      val intValue = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+      intValue
+    } catch (e: Exception) {
+      // Если не удалось получить как Int, пробуем как String (старый SDK)
+      try {
+        val reasonCodeString = data?.getStringExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name)
+        val stringValue = reasonCodeString?.toIntOrNull() ?: 0
+        stringValue
+      } catch (e2: Exception) {
+        0
+      }
+    }
+
+    // Проверяем, есть ли URL с информацией об ошибке (например, из 3D Secure)
     val dataString = data?.dataString
 
     if (dataString != null && dataString.contains("threeds/fail")) {
@@ -305,8 +371,9 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
           handleFailedPayment(errorIntent)
           eventEmitter.sendFormDidHide()
 
-          // Очищаем Promise и сбрасываем флаги
-          pendingPromise = null
+          // Промис уже очищен в handleFailedPayment
+
+          // Сбрасываем флаги
           isProcessingResult = false
           hasActivePaymentAttempt = false
 
@@ -317,63 +384,71 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
       }
     }
 
-    // Отправляем события
+    // Отправляем событие willHide перед обработкой результата
     eventEmitter.sendFormWillHide()
 
-    when (resultCode) {
-      Activity.RESULT_OK -> {
-        when (transactionStatus) {
-          CloudpaymentsSDK.TransactionStatus.Succeeded -> {
-            handleSuccessfulPayment(data)
-          }
-          CloudpaymentsSDK.TransactionStatus.Failed -> {
-            handleFailedPayment(data)
-          }
-          null -> {
-            // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: правильная обработка неизвестного статуса
-            // Если статус неизвестен, но resultCode = OK, проверяем наличие transactionId
+    // В старом SDK все методы вызывают setResult(RESULT_OK, ...), даже для ошибок
+    // Статус определяется по TransactionStatus в Intent, а не по resultCode
+    // Поэтому сначала проверяем transactionStatus, а не resultCode
+    when (transactionStatus) {
+      CloudpaymentsSDK.TransactionStatus.Succeeded -> {
+        // Успешный платеж - всегда обрабатываем как успех
+        handleSuccessfulPayment(data)
+      }
+      
+      CloudpaymentsSDK.TransactionStatus.Failed -> {
+        // Неудачный платеж - всегда обрабатываем как ошибку
+        handleFailedPayment(data)
+      }
+      
+      null -> {
+        // Если статус неизвестен, определяем по resultCode и другим признакам
+        when (resultCode) {
+          Activity.RESULT_OK -> {
+            // Если resultCode = OK, но статус неизвестен, проверяем наличие transactionId
             if (transactionId > 0L) {
               // Если есть transactionId, значит платеж прошел успешно
               handleSuccessfulPayment(data)
-            } else {
-              // Если нет transactionId, значит была ошибка
+            } else if (reasonCode > 0) {
+              // Если есть reasonCode, значит была ошибка
               handleFailedPayment(data)
+            } else {
+              // Если нет ни transactionId, ни reasonCode, считаем отменой
+              handleCancelledPayment()
             }
           }
-        }
-      }
-
-      Activity.RESULT_CANCELED -> {
-        when {
-          // Если статус явно указывает на неудачу - это ошибка
-          transactionStatus == CloudpaymentsSDK.TransactionStatus.Failed -> {
-            handleFailedPayment(data)
+          
+          Activity.RESULT_CANCELED -> {
+            // Если resultCode = CANCELED, проверяем дополнительные признаки
+            when {
+              // Если есть код ошибки, но нет ID транзакции - это ошибка
+              reasonCode > 0 && transactionId <= 0L -> {
+                handleFailedPayment(data)
+              }
+              // Если есть ID транзакции - возможно успех (редкий случай)
+              transactionId > 0L -> {
+                handleSuccessfulPayment(data)
+              }
+              // Во всех остальных случаях - отмена пользователем
+              else -> {
+                handleCancelledPayment()
+              }
+            }
           }
-          // Если есть код ошибки, но нет ID транзакции - это ошибка
-          reasonCode > 0 && transactionId <= 0L -> {
-            handleFailedPayment(data)
-          }
-          // Если есть ID транзакции - возможно успех (редкий случай)
-          transactionId > 0L -> {
-            handleSuccessfulPayment(data)
-          }
-          // Во всех остальных случаях - отмена пользователем
+          
           else -> {
-            handleCancelledPayment()
+            // Любой другой код результата считаем ошибкой, а не отменой
+            handleFailedPayment(data)
           }
         }
-      }
-
-      else -> {
-        // Любой другой код результата считаем ошибкой, а не отменой
-        handleFailedPayment(data)
       }
     }
 
+    // Отправляем событие didHide после обработки результата
+    // Промис уже разрешен/реджекчен и очищен в handleSuccessfulPayment/handleFailedPayment/handleCancelledPayment
     eventEmitter.sendFormDidHide()
 
-    // Очищаем Promise и сбрасываем флаги
-    pendingPromise = null
+    // Сбрасываем флаги
     isProcessingResult = false
     hasActivePaymentAttempt = false
   }
@@ -385,13 +460,6 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
     try {
       // Извлекаем данные транзакции из Intent используя ключи CloudPayments SDK
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
-      val transactionStatus = data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
-      val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
-
-      // НОВОЕ: Очищаем сохраненные ошибки при успешном платеже
-      lastPaymentError = null
-      lastPaymentErrorCode = null
-      paymentStartTime = 0L
 
       // Отправляем событие успешной транзакции
       eventEmitter.sendTransactionSuccess(
@@ -406,41 +474,77 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
         putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_COMPLETED_SUCCESSFULLY.rawValue)
       }
 
-      pendingPromise?.resolve(result)
+      // Разрешаем промис на главном потоке
+      val promise = pendingPromise
+      Handler(Looper.getMainLooper()).post {
+        try {
+          promise?.resolve(result)
+          pendingPromise = null
+        } catch (e: Exception) {
+          // Игнорируем ошибки разрешения промиса
+        }
+      }
     } catch (e: Exception) {
-      pendingPromise?.reject(EAndroidSpecific.SUCCESS_PROCESSING_ERROR, e.message, e)
+      val promise = pendingPromise
+      Handler(Looper.getMainLooper()).post {
+        promise?.reject(EAndroidSpecific.SUCCESS_PROCESSING_ERROR, e.message, e)
+        pendingPromise = null
+      }
     }
   }
 
   /**
    * Обработка неудачного платежа
-   * ВАЖНО: Promise НЕ resolve-ается здесь сразу!
-   * Promise будет resolve-ан в handleCancelledPayment() когда пользователь закроет форму
    */
   private fun handleFailedPayment(data: Intent?) {
     try {
       // Извлекаем данные об ошибке из Intent
       val transactionId = data?.getLongExtra(CloudpaymentsSDK.IntentKeys.TransactionId.name, EDefaultValues.DEFAULT_TRANSACTION_ID) ?: EDefaultValues.DEFAULT_TRANSACTION_ID
-      val transactionStatus = data?.getSerializableExtra(CloudpaymentsSDK.IntentKeys.TransactionStatus.name) as? CloudpaymentsSDK.TransactionStatus
-      val reasonCode = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+
+      // reasonCode может быть как String (старый SDK) так и Int (новый SDK)
+      val reasonCode: Int = try {
+        val intValue = data?.getIntExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name, 0) ?: 0
+        intValue
+      } catch (e: Exception) {
+        try {
+          val reasonCodeString = data?.getStringExtra(CloudpaymentsSDK.IntentKeys.TransactionReasonCode.name)
+          val stringValue = reasonCodeString?.toIntOrNull() ?: 0
+          stringValue
+        } catch (e2: Exception) {
+          0
+        }
+      }
 
       // Получаем код ошибки и сообщение на основе reasonCode
       val errorCode = PaymentDataConverter.getErrorCodeFromReasonCode(reasonCode)
       val errorMessage = PaymentDataConverter.getErrorMessage(reasonCode)
 
-      // ИСПРАВЛЕНО: Сохраняем информацию об ошибке для последующего использования
-      lastPaymentError = errorMessage
-      lastPaymentErrorCode = errorCode
-
-      // Отправляем событие ошибки транзакции (для уведомления UI)
+      // Отправляем событие ошибки транзакции
       eventEmitter.sendTransactionError(
         message = errorMessage,
         errorCode = errorCode
       )
 
+      // Реджектим промис на главном потоке
+      val promise = pendingPromise
+      Handler(Looper.getMainLooper()).post {
+        try {
+          promise?.reject(
+            errorCode,
+            errorMessage,
+            null
+          )
+          pendingPromise = null
+        } catch (e: Exception) {
+        }
+      }
     } catch (e: Exception) {
-      // Только в случае исключения resolve Promise с ошибкой
-      pendingPromise?.reject(EAndroidSpecific.FAILED_PROCESSING_ERROR, e.message, e)
+      // Только в случае исключения reject Promise с ошибкой
+      val promise = pendingPromise
+      Handler(Looper.getMainLooper()).post {
+        promise?.reject(EAndroidSpecific.FAILED_PROCESSING_ERROR, e.message, e)
+        pendingPromise = null
+      }
     }
   }
 
@@ -448,70 +552,31 @@ class CloudpaymentsSdkModule(reactContext: ReactApplicationContext) :
    * Обработка отменённого платежа
    */
   private fun handleCancelledPayment() {
-    // НОВОЕ: Анализируем время работы формы
-    val paymentDuration = System.currentTimeMillis() - paymentStartTime
+    // Отправляем событие отмены
+    eventEmitter.sendTransactionCancelled(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
 
-    // УЛУЧШЕНО: Проверяем, была ли ошибка до закрытия формы
-    if (lastPaymentError != null && lastPaymentErrorCode != null) {
-      // Если была ошибка, отправляем событие ошибки, а не отмены
-      eventEmitter.sendTransactionError(
-        message = lastPaymentError!!,
-        errorCode = lastPaymentErrorCode!!
-      )
-
-      // Создаем результат с ошибкой для Promise
-      val result = Arguments.createMap().apply {
-        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
-        putString(EResponseKeys.ERROR_CODE.rawValue, lastPaymentErrorCode!!)
-        putString(EResponseKeys.MESSAGE.rawValue, lastPaymentError!!)
+    // Реджектим промис на главном потоке при отмене
+    val cancelMessage = EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue
+    val promise = pendingPromise
+    Handler(Looper.getMainLooper()).post {
+      try {
+        promise?.reject(
+          ECloudPaymentsError.PAYMENT_FAILED.rawValue,
+          cancelMessage,
+          null
+        )
+        pendingPromise = null
+      } catch (e: Exception) {
       }
-
-      pendingPromise?.resolve(result)
-    } else if (paymentDuration > 10000) {
-      // НОВАЯ ЛОГИКА: Если форма работала более 10 секунд, вероятно была ошибка 3D Secure
-      // Предполагаем, что была ошибка 3D Secure
-      val errorMessage = "3-D Secure авторизация не пройдена"
-      val errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue
-
-      eventEmitter.sendTransactionError(
-        message = errorMessage,
-        errorCode = errorCode
-      )
-
-      // Создаем результат с ошибкой для Promise
-      val result = Arguments.createMap().apply {
-        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
-        putString(EResponseKeys.ERROR_CODE.rawValue, errorCode)
-        putString(EResponseKeys.MESSAGE.rawValue, errorMessage)
-      }
-
-      pendingPromise?.resolve(result)
-    } else {
-      // Если ошибки не было, это действительно отмена пользователем
-      eventEmitter.sendTransactionCancelled(EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
-
-      // Создаем результат отмены для Promise
-      val result = Arguments.createMap().apply {
-        putBoolean(EResponseKeys.SUCCESS.rawValue, false)
-        putString(EResponseKeys.STATUS.rawValue, EPaymentResultValues.CANCELLED.rawValue)
-        putString(EResponseKeys.MESSAGE.rawValue, EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue)
-        putString(EResponseKeys.ERROR_CODE.rawValue, ECloudPaymentsError.PAYMENT_FAILED.rawValue)
-      }
-
-      pendingPromise?.resolve(result)
     }
-
-    // Очищаем сохраненные ошибки после обработки
-    lastPaymentError = null
-    lastPaymentErrorCode = null
     hasActivePaymentAttempt = false
-    paymentStartTime = 0L
   }
 
   /**
    * Освобождение ресурсов при уничтожении модуля
    */
   override fun onCatalystInstanceDestroy() {
+    unregisterLifecycleCallback()
     pendingPromise = null
   }
 }

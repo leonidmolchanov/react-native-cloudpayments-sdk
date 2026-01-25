@@ -11,6 +11,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
     // Callbacks для React Native
     private var onPaymentSuccess: RCTResponseSenderBlock?
     private var onPaymentFailure: RCTResponseSenderBlock?
+    
     @objc public init(publicId: String, CPSDK: CloudpaymentsSdkImpl?) {
         self.CPSDK = CPSDK
         self.publicId = publicId
@@ -29,7 +30,6 @@ public class CloudpaymentsPaymentFormService: NSObject {
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
-
         // Создаем callbacks для конвертации resolve/reject в RCTResponseSenderBlock
       let onSuccess: RCTResponseSenderBlock = { result in
           if let unwrappedResult = result, let resultDict = unwrappedResult.first as? [String: Any] {
@@ -72,6 +72,7 @@ public class CloudpaymentsPaymentFormService: NSObject {
         }
 
       guard let paymentObj = PaymentData(from: paymentData) else {
+          onFailure([EDefaultMessages.failedToCreatePaymentData.rawValue])
           return
       }
 
@@ -188,43 +189,58 @@ extension CloudpaymentsPaymentFormService: PaymentDelegate {
 
     public func onPaymentFinished(_ transactionId: Int64?) {
         DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
             let result: [String: Any] = [
                 EResponseKeys.success.rawValue: true,
                 EResponseKeys.transactionId.rawValue: transactionId ?? EDefaultValues.defaultTransactionId,
                 EResponseKeys.message.rawValue: EDefaultMessages.paymentCompletedSuccessfully.rawValue
             ]
-          self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
-             EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
-              EResponseKeys.statusCode.rawValue: true,
-              EResponseKeys.transactionId.rawValue: transactionId as Any
-          ])
-            self?.onPaymentSuccess?([result])
-            self?.cleanup()
+            
+            // Отправляем событие
+            self.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
+               EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
+                EResponseKeys.statusCode.rawValue: true,
+                EResponseKeys.transactionId.rawValue: transactionId as Any
+            ])
+            
+            self.onPaymentSuccess?([result])
+            self.cleanup()
         }
     }
 
     public func onPaymentFailed(_ errorMessage: String?) {
         DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
             let error = errorMessage ?? EDefaultMessages.paymentFailed.rawValue
-          self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
-             EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
-              EResponseKeys.statusCode.rawValue: false,
-              EResponseKeys.message.rawValue: errorMessage ?? EDefaultMessages.unknownError.rawValue
-          ])
-            self?.onPaymentFailure?([error])
-            self?.cleanup()
+            
+            // Отправляем событие
+            self.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
+               EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
+                EResponseKeys.statusCode.rawValue: false,
+                EResponseKeys.message.rawValue: errorMessage ?? EDefaultMessages.unknownError.rawValue
+            ])
+            
+            self.onPaymentFailure?([error])
+            self.cleanup()
         }
     }
 
     public func onPaymentClosed() {
         DispatchQueue.main.async { [weak self] in
-            // Платеж был закрыт пользователем без завершения
-          self?.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
+            guard let self = self else { return }
+            
+            // Отправляем событие
+            self.CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [
               EPaymentFormAction.action.rawValue: EPaymentFormAction.transaction.rawValue,
                 EResponseKeys.statusCode.rawValue: false,
                 EResponseKeys.message.rawValue: "Payment closed by user"
           ])
-            self?.cleanup()
+            
+            let cancelMessage = "Payment cancelled by user"
+            self.onPaymentFailure?([cancelMessage])
+            self.cleanup()
         }
     }
 
@@ -248,7 +264,6 @@ extension CloudpaymentsPaymentFormService: PaymentUIDelegate {
 
     public func paymentFormDidHide() {
       CPSDK?.sendEvent(name: EPaymentFormEventName.paymentForm.rawValue, data: [EPaymentFormAction.action.rawValue: EPaymentFormEvent.didHide.rawValue])
-        cleanup()
     }
 }
 

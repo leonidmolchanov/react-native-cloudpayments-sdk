@@ -15,7 +15,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
  * @since 1.0.0
  */
 class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContext) {
-    
     /**
      * Отправка произвольного события в JavaScript
      *
@@ -29,8 +28,7 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                     .emit(eventName, params)
             } catch (e: Exception) {
-                // Критическая ошибка - оставляем для отладки
-                android.util.Log.e("CloudPayments", "Failed to send event: ${e.message}", e)
+                // Критическая ошибка - игнорируем
             }
         }
     }
@@ -59,10 +57,18 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
             
             // Для транзакций добавляем дополнительные поля
             if (action == EPaymentFormAction.TRANSACTION.rawValue) {
-                statusCode?.let { putBoolean(EResponseKeys.STATUS_CODE.rawValue, it) }
-                transactionId?.let { putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble()) }
-                message?.let { putString(EResponseKeys.MESSAGE.rawValue, it) }
-                errorCode?.let { putString(EResponseKeys.ERROR_CODE.rawValue, it) }
+                statusCode?.let { 
+                    putBoolean(EResponseKeys.STATUS_CODE.rawValue, it) 
+                }
+                transactionId?.let { 
+                    putDouble(EResponseKeys.TRANSACTION_ID.rawValue, it.toDouble()) 
+                }
+                message?.let { 
+                    putString(EResponseKeys.MESSAGE.rawValue, it) 
+                }
+                errorCode?.let { 
+                    putString(EResponseKeys.ERROR_CODE.rawValue, it) 
+                }
             }
         }
         
@@ -95,11 +101,10 @@ class CloudPaymentsEventEmitter(private val reactContext: ReactApplicationContex
     
     /**
      * Отправка события отмены платежа
-     * ИСПРАВЛЕНО: теперь отправляет специальное событие отмены, а не ошибки
      */
     fun sendTransactionCancelled(message: String? = null) {
         sendPaymentFormEvent(
-            action = "cancelled", // Специальное действие для отмены
+            action = EPaymentFormAction.TRANSACTION.rawValue,
             statusCode = false,
             message = message ?: EDefaultMessages.PAYMENT_CANCELLED_BY_USER.rawValue,
             errorCode = ECloudPaymentsError.PAYMENT_FAILED.rawValue

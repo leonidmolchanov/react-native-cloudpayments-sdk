@@ -33,4 +33,7 @@ export interface Spec extends TurboModule {
   getBankInfo(cardNumber: string): Promise<Object>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('CloudpaymentsSdk');
+const CloudpaymentsSdkModule =
+  TurboModuleRegistry.getEnforcing<Spec>('CloudpaymentsSdk');
+
+export default CloudpaymentsSdkModule;

@@ -49,7 +49,7 @@ export const PaymentService: IPaymentService = {
   },
 
   //@ts-ignore
-  presentPaymentForm(paymentData: IPaymentData) {
+  async presentPaymentForm(paymentData: IPaymentData) {
     return CloudpaymentsSdk.presentPaymentForm(paymentData);
   },
 };
