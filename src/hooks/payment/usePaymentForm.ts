@@ -93,11 +93,12 @@ export const usePaymentForm = (
           error instanceof Error ? error.message : 'Неизвестная ошибка';
 
         // Возвращаем результат с ошибкой
-        return {
+        const errorResult = {
           success: false,
           message: errorMessage,
           transactionId: undefined,
         };
+        return errorResult;
       }
     },
     [publicId]

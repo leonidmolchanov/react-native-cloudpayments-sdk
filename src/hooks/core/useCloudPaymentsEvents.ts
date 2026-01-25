@@ -237,7 +237,7 @@ export const useCloudPaymentsEvents = (
           break;
 
         default:
-          console.warn('Неизвестное действие платежной формы:', event.action);
+          console.warn('Unknown action:', event.action);
       }
     },
     [setStatus, setError, onSuccess, onError, onCancel]
@@ -257,9 +257,17 @@ export const useCloudPaymentsEvents = (
     enabledEvents.forEach((eventName) => {
       switch (eventName) {
         case EPaymentFormEventName.PAYMENT_FORM:
-          subscriptions.push(
-            eventEmitter.addListener(eventName, handlePaymentFormEvent)
-          );
+          try {
+            const subscription = eventEmitter.addListener(
+              eventName,
+              (event) => {
+                handlePaymentFormEvent(event);
+              }
+            );
+            subscriptions.push(subscription);
+          } catch (error) {
+            console.error('Failed to add listener:', error);
+          }
           break;
 
         case EPaymentFormEventName.PAYMENT:

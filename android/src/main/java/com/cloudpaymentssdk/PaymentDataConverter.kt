@@ -225,11 +225,9 @@ object PaymentDataConverter {
 
             // SDK 2.1.1: Receipt передается как Map<String, Any>
             if (paymentDataMap.hasKey(EPaymentConfigKeys.RECEIPT.rawValue)) {
-              Log.d("CloudPaymentsSDKPay", "RECEIPT key exists")
 
               val receiptMap = paymentDataMap.getMap(EPaymentConfigKeys.RECEIPT.rawValue)
                 val receiptJson = JSONObject(readableMapToJson(receiptMap))
-              Log.d("CloudPaymentsSDKPay", "receiptJson(before normalize) = ${receiptJson.toString(2)}")
 
               // Приводим ключи к ожидаемому формату API: items -> Items
                 if (receiptJson.has("items") && !receiptJson.has("Items")) {
@@ -244,7 +242,6 @@ object PaymentDataConverter {
                     jsonDataObject.put(EPaymentConfigKeys.CLOUDPAYMENTS.rawValue, newCloudPayments)
                     newCloudPayments
                 }
-              Log.d("CloudPaymentsSDKPay", "receiptJson(before normalize final) = ${receiptJson.toString(2)}")
 
 
                 cloudPaymentsJson.put(EPaymentConfigKeys.CUSTOMER_RECEIPT.rawValue, receiptJson)
